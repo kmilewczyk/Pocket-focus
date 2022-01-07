@@ -8,9 +8,8 @@ describe('PomodoroComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PomodoroComponent ]
-    })
-    .compileComponents();
+      declarations: [PomodoroComponent],
+    }).compileComponents();
   });
 
   beforeEach(() => {

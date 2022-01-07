@@ -1,0 +1,13 @@
+@media screen and (min-width: 360px) {
+  .pomodoro-timer {
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+  }
+}
+
+.task-title {
+  background: transparent;
+  color: #eee;
+  text-align: center;
+  border: 0 !important;
+}

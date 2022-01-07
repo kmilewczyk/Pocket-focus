@@ -1,10 +1,16 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-const routes: Routes = [{ path: '', loadChildren: () => import('../pomodoro/pomodoro.module').then(m => m.PomodoroModule) }];
+const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () =>
+      import('../pomodoro/pomodoro.module').then((m) => m.PomodoroModule),
+  },
+];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

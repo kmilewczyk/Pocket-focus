@@ -1,9 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import "./variables.scss";
 
+@import "./bootswatch_variables.scss";
 
-$body-bg:                   #333 !default;
-$body-color:                #eee !default;
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons.scss";
 
-
-@import '../node_modules/bootstrap/scss/bootstrap.scss';
+@import "../node_modules/bootstrap/scss/bootstrap.scss";
