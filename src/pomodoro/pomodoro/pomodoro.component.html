@@ -11,46 +11,38 @@
   </div>
   <div class="row mb-2">
     <div class="col-md-7 mx-auto p-3">
-      <input
-        class="task-title display-6 w-100 rounded-3"
-        type="text"
-        placeholder="Insert task title here"
-      />
+      <input class="task-title display-6 w-100 rounded-3" type="text" placeholder="Insert task title here" />
     </div>
   </div>
   <div class="row mb-5">
     <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto">
-      <div class="flex-grow-1 pomodoro-timer bg-dark">
-        <div
-          class="d-flex flex-column align-items-center justify-content-center h-100 p-5"
-        >
-          <div class="text-center">
+      <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
+          <div class="align-self-end mt-sm-n6 mb-xs-4">
+            <i class="bi bi-x-circle display-3"></i>
+          </div>
+          <div [style.visibility]="(timerType === TimerType.Indefinite) ? 'hidden' : 'visible'" class="text-center">
             <h3>Total time</h3>
             <p>1 hour</p>
           </div>
-          <div class="">
-            <div class="text-center">
-              <h1 style="font-size: calc(4rem + 5vw)" class="display-1">
-                25:00
-              </h1>
-              <p style="font-size: calc(1rem + 1vw)" class="text-muted">
-                05:00 break
-              </p>
-            </div>
-          </div>
+          <app-timer></app-timer>
           <br />
-          <button style="min-width: 8rem" class="btn btn-outline-primary">
-            <h5>hour</h5>
+          <button style="min-width: 8rem" class="btn btn-outline-primary" (click)="onTimerTypeSwitch()">
+            <h5 *ngIf="timerType === TimerType.Pomodoro">pomodoro</h5>
+            <h5 *ngIf="timerType === TimerType.Hour">hour</h5>
+            <h5 *ngIf="timerType === TimerType.Indefinite">indefinite</h5>
           </button>
         </div>
       </div>
     </div>
   </div>
   <div class="row">
-    <div class="d-flex justify-content-center">
-      <button class="btn btn-lg btn-primary">
+    <div class="d-flex justify-content-center mx-auto">
+      <button class="btn btn-primary stop-button"> break </button>
+      <button class="btn btn-lg btn-primary mx-1">
         <i class="bi bi-play-fill display-5"></i>
       </button>
+      <button class="btn btn-primary stop-button"> interrupt </button>
     </div>
   </div>
 </div>

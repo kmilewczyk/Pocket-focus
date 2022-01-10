@@ -1,7 +1,6 @@
-@media screen and (min-width: 360px) {
+@media screen and (min-width: 576px) {
   .pomodoro-timer {
     aspect-ratio: 1/1;
-    border-radius: 50%;
   }
 }
 
@@ -10,4 +9,9 @@
   color: #eee;
   text-align: center;
   border: 0 !important;
+}
+
+.stop-button {
+  width: 8rem;
+  font-size: x-large;
 }
