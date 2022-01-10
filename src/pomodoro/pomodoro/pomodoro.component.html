@@ -1,17 +1,18 @@
 <div class="container-md">
   <div class="row">
     <nav class="col-lg-10 mx-auto navbar navbar-dark mb-3 p-2 bg-dark dark">
-      <div class="container-fluid">
+      <div class="container-fluid p-1 p-sm-3">
         <h1 class="navbar-brand">Pomodoro app</h1>
         <a role="button" class="text-light">
-          <i class="bi bi-gear display-5 p-2" aria-label="Settings"></i>
+          <i class="bi bi-gear display-5 " aria-label="Settings"></i>
         </a>
       </div>
     </nav>
   </div>
   <div class="row mb-2">
     <div class="col-md-7 mx-auto p-3">
-      <input class="task-title display-6 w-100 rounded-3" type="text" placeholder="Insert task title here" />
+      <textarea appStretch style="resize: none" rows="1" class="task-title display-6 w-100 rounded-3"
+        placeholder="Insert task title here." wrap="soft"></textarea>
     </div>
   </div>
   <div class="row mb-5">
