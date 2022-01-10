@@ -1,4 +1,6 @@
-@media screen and (min-width: 576px) {
+@import '../../variables.scss';
+
+@media screen and (min-width: $sm) {
   .pomodoro-timer {
     aspect-ratio: 1/1;
   }
@@ -14,4 +16,10 @@
 .stop-button {
   width: 8rem;
   font-size: x-large;
+}
+
+@media screen and (max-width: ($sm - 1px) ) {
+  .bg-dark-at-xs {
+    background: $dark;
+  }
 }

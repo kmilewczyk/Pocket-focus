@@ -1,6 +1,26 @@
+$xs: 0;
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1200px;
+$xxl: 1400px;
+
+
+$grid-breakpoints: (
+  xs: $xs,
+  sm: $sm,
+  md: $md,
+  lg: $lg,
+  xl: $xl,
+  xxl: $xxl
+);
+
+$dark: #2a2a2a;
+
 $body-bg: #333 !default;
 $body-color: #eee !default;
 $primary: #c66;
+$secondary: #55a;
 
 $position-values: (
   0: 0,

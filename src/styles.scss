@@ -4,6 +4,10 @@
 
 @import "./bootswatch_variables.scss";
 
+.darken {
+  background: rgba(0, 0, 0, 0.2);
+}
+
 $enable-negative-margins: true;
 
 // Left for possible map-merges

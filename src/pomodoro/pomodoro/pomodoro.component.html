@@ -1,27 +1,40 @@
 <div class="container-md">
   <div class="row">
-    <nav class="col-lg-10 mx-auto navbar navbar-dark mb-3 p-2 bg-dark dark">
+    <nav class="col-lg-10 mx-auto navbar navbar-dark p-2 bg-dark">
       <div class="container-fluid p-1 p-sm-3">
         <h1 class="navbar-brand">Pomodoro app</h1>
-        <a role="button" class="text-light">
-          <i class="bi bi-gear display-5 " aria-label="Settings"></i>
-        </a>
+        <div>
+          <a role="button" class="text-light mx-2" (click)="goalsVisible = !goalsVisible">
+            <i *ngIf="!goalsVisible" class="bi bi-award display-5" aria-label="Productivity"></i>
+            <i *ngIf="goalsVisible" class="bi bi-award-fill display-5" aria-label="Productivity"></i>
+          </a>
+          <a role="button" class="text-light mx-1">
+            <i class="bi bi-gear display-5" aria-label="Settings"></i>
+          </a>
+        </div>
       </div>
     </nav>
   </div>
+  <div *ngIf="goalsVisible" [@productivityVisible]="goalsVisible" class="row">
+    <app-productivity></app-productivity>
+  </div>
   <div class="row mb-2">
     <div class="col-md-7 mx-auto p-3">
-      <textarea appStretch style="resize: none" rows="1" class="task-title display-6 w-100 rounded-3"
+      <textarea appStretch style="resize: none; overflow: hidden;" rows="1" class="task-title display-6 w-100 rounded-3"
         placeholder="Insert task title here." wrap="soft"></textarea>
     </div>
   </div>
+  <div class="row mb-sm-n5">
+    <div class="bg-dark-at-xs col-sm-10 col-lg-7 col-xl-6 mx-auto d-flex justify-content-end">
+      <button class="btn">
+        <i class="bi bi-x-circle display-3"></i>
+      </button>
+    </div>
+  </div>
   <div class="row mb-5">
-    <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto">
+    <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto bg-dark-at-xs">
       <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
         <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
-          <div class="align-self-end mt-sm-n6 mb-xs-4">
-            <i class="bi bi-x-circle display-3"></i>
-          </div>
           <div [style.visibility]="(timerType === TimerType.Indefinite) ? 'hidden' : 'visible'" class="text-center">
             <h3>Total time</h3>
             <p>1 hour</p>
