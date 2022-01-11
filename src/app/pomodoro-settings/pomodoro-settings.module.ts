@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { PomodoroSettingsRoutingModule } from './pomodoro-settings-routing.module';
 import { PomodoroSettingsComponent } from './pomodoro-settings/pomodoro-settings.component';
+import { SharedModule } from '@app/shared/shared.module';
 
 
 @NgModule({
@@ -11,6 +12,7 @@ import { PomodoroSettingsComponent } from './pomodoro-settings/pomodoro-settings
   ],
   imports: [
     CommonModule,
+    SharedModule,
     PomodoroSettingsRoutingModule
   ]
 })
