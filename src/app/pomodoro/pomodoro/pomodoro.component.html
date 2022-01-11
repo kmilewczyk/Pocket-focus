@@ -1,25 +1,15 @@
 <div class="container-md">
-  <div class="row">
-    <nav class="col-lg-10 mx-auto navbar navbar-dark p-2 bg-dark">
-      <div class="container-fluid p-1 p-sm-3">
-        <h1 class="navbar-brand">Pomodoro app</h1>
-        <div>
-          <a role="button" class="text-light mx-2" (click)="goalsVisible = !goalsVisible">
-            <i *ngIf="!goalsVisible" class="bi bi-award display-5" aria-label="Productivity"></i>
-            <i *ngIf="goalsVisible" class="bi bi-award-fill display-5" aria-label="Productivity"></i>
-          </a>
-          <a role="button" class="text-light mx-1">
-            <i class="bi bi-gear display-5" aria-label="Settings"></i>
-          </a>
-        </div>
-      </div>
-    </nav>
-  </div>
+  <app-pomodoro-header>
+    <a role="button" class="text-light mx-2" (click)="goalsVisible = !goalsVisible">
+        <i *ngIf="!goalsVisible" class="bi bi-award display-5" aria-label="Productivity"></i>
+        <i *ngIf="goalsVisible" class="bi bi-award-fill display-5" aria-label="Productivity"></i>
+    </a>
+  </app-pomodoro-header>
   <div *ngIf="goalsVisible" [@productivityVisible]="goalsVisible" class="row">
     <app-productivity></app-productivity>
   </div>
   <div class="row mb-2">
-    <div class="col-md-7 mx-auto p-3">
+    <div class="col-md-7 mx-auto p-3 bg-dark-at-xs rounded  mt-2">
       <textarea appStretch style="resize: none; overflow: hidden;" rows="1" class="task-title display-6 w-100 rounded-3"
         placeholder="Insert task title here." wrap="soft"></textarea>
     </div>
@@ -41,7 +31,7 @@
           </div>
           <app-timer></app-timer>
           <br />
-          <button style="min-width: 8rem" class="btn btn-outline-primary" (click)="onTimerTypeSwitch()">
+          <button style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
             <h5 *ngIf="timerType === TimerType.Pomodoro">pomodoro</h5>
             <h5 *ngIf="timerType === TimerType.Hour">hour</h5>
             <h5 *ngIf="timerType === TimerType.Indefinite">indefinite</h5>

@@ -1,0 +1,16 @@
+<div class="col-lg-8 bg-secondary mx-auto p-2">
+    <div class="form-check form-switch h5 mb-2">
+        <input class="form-check-input" name="goalsEnabled" type="checkbox" role="switch" id="switchGoalFunctionality" [(ngModel)]="goalsEnabled">
+        <label for="switchGoalFunctionality" class="form-check-label"> Enable daily goals. </label>
+    </div>
+    <p *ngIf="!goalsEnabled"> Enable daily goals to set daily time targets for yourself.</p>
+    <div class="row ">
+
+    </div>
+    <div class="form-check form-switch h5 mb-2 mt-2">
+        <input class="form-check-input" name="scheduleEnabled" type="checkbox" role="switch" id="switchDailyScheduleFunctionality" [(ngModel)]="scheduleEnabled">
+        <label for="switchDailyScheduleFunctionality" class="form-check-label"> Enable daily schedule. </label>
+    </div>
+    <p *ngIf="!scheduleEnabled"> Enable daily schedule to set the time to start the work session. The app will notify you and autostart your
+        timer at the beginning of the day. </p>
+</div>

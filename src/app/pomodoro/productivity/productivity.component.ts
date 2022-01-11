@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./productivity.component.scss']
 })
 export class ProductivityComponent implements OnInit {
+  goalsEnabled = false;
+  scheduleEnabled = false;
 
   constructor() { }
 

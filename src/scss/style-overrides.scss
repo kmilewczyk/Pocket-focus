@@ -1,0 +1,8 @@
+@import './variables.scss';
+
+.btn-outline-light:hover {
+    color: $dark;
+    font-weight: bolder;
+    background-color: #adb5bd;
+    border-color: #adb5bd;
+}
