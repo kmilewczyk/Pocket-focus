@@ -33,6 +33,8 @@ export class PomodoroComponent implements OnInit {
 
   timerType: TimerType = TimerType.Pomodoro;
   goalsVisible = false;
+  timerRunning = false;
+  editMode = false;
 
   constructor () {}
 
@@ -43,5 +45,13 @@ export class PomodoroComponent implements OnInit {
 
     // Switch to the next in the array; wrap when at the last
     this.timerType = switchValues[(switchValues.indexOf(this.timerType)+1) % switchValues.length];
+  }
+
+  onClose () {
+    this.timerRunning = false;
+  }
+
+  onEditSwitch() {
+    this.editMode = !this.editMode;
   }
 }

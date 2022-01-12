@@ -1,18 +1,25 @@
 <div>
     <div class="text-center">
-        <div class="d-flex align-items-center">
+        <div *ngIf="editMode; else normalView" class="d-flex align-items-center">
             <button class="btn">
                 <i class="bi bi-dash-circle display-5"></i>
             </button>
             <h1 class="display-1 mx-sm-2">
-                <span style="font-size: calc(3rem + 5vw)">25:00</span>
+                <span class="time-display">30:00</span>
             </h1>
             <button class="btn">
                 <i class="bi bi-plus-circle display-5"></i>
             </button>
         </div>
-        <p style="font-size: calc(1rem + 1vw)" class="text-muted">
-            05:00 break
-        </p>
+        <ng-template #normalView>
+            <div class="d-flex align-items-center">
+                <h1 class="display-1 mx-sm-2">
+                    <span class="time-display">25:00</span>
+                </h1>
+            </div>
+            <p style="font-size: calc(1rem + 1vw)" class="text-muted">
+                05:00 break
+            </p>
+        </ng-template>
     </div>
 </div>

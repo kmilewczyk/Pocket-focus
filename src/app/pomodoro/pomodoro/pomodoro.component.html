@@ -1,7 +1,6 @@
 <app-pomodoro-header>
   <a role="button" class="text-light mx-2" (click)="goalsVisible = !goalsVisible">
-    <i *ngIf="!goalsVisible" class="bi bi-award display-5" aria-label="Productivity"></i>
-    <i *ngIf="goalsVisible" class="bi bi-award-fill display-5" aria-label="Productivity"></i>
+    <i [class]="goalsVisible ? 'bi-award-fill' : 'bi-award'" class="bi display-5" aria-label="Productivity"></i>
   </a>
 </app-pomodoro-header>
 
@@ -14,22 +13,34 @@
       placeholder="Insert task title here." wrap="soft"></textarea>
   </div>
 </div>
-<div class="row mb-sm-n5">
-  <div class="bg-dark-at-xs pb-4 col-sm-10 col-lg-7 col-xl-6 mx-auto d-flex justify-content-end">
-    <button class="btn">
+<div class="row mb-sm-n6">
+  <div class="bg-dark-at-xs pb-4 col-sm-10 col-lg-7 col-xl-6 mx-auto d-flex">
+    <button [class.disabled]="timerRunning" class="btn" (click)="onEditSwitch()">
+      <i [class]="editMode ? 'bi-pencil-fill' : 'bi-pencil'" class="bi display-3"></i>
+    </button>
+
+    <div class="w-100"></div>
+
+    <button [class.disabled]="!timerRunning" class="btn" (click)="onClose()">
       <i class="bi bi-x-circle display-3"></i>
     </button>
   </div>
 </div>
-<div class="row mb-5">
+<div class="row mb-2">
   <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto bg-dark-at-xs">
     <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
       <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
-        <div [style.visibility]="(timerType === TimerType.Indefinite) ? 'hidden' : 'visible'" class="text-center">
-          <h3>Total time</h3>
-          <p>1 hour</p>
+        <div *ngIf="editMode; else totalTimeLabel" class="text-center">
+          <h3> Pick session duration </h3>
+          <p> breaks included </p>
         </div>
-        <app-timer></app-timer>
+        <ng-template #totalTimeLabel>
+          <div [style.visibility]="(timerType === TimerType.Indefinite) ? 'hidden' : 'visible'" class="text-center">
+            <h3>Total time</h3>
+            <p>1 hour</p>
+          </div>
+        </ng-template>
+        <app-timer [editMode]="this.editMode"></app-timer>
         <br />
         <button style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
           <h5 *ngIf="timerType === TimerType.Pomodoro">pomodoro</h5>
@@ -40,12 +51,12 @@
     </div>
   </div>
 </div>
-<div class="row">
+<div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
-    <button class="btn btn-primary stop-button"> break </button>
-    <button class="btn btn-lg btn-primary mx-1">
+    <button *ngIf="timerRunning" class="btn btn-primary stop-button"> break </button>
+    <button [style.visibility]="timerRunning ? 'hidden' : 'visible'" class="btn btn-lg btn-primary mx-1" (click)="timerRunning = true;">
       <i class="bi bi-play-fill display-5"></i>
     </button>
-    <button class="btn btn-primary stop-button"> interrupt </button>
+    <button *ngIf="timerRunning" class="btn btn-primary stop-button"> interrupt </button>
   </div>
 </div>

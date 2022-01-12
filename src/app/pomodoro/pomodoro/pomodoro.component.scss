@@ -14,8 +14,15 @@
 }
 
 .stop-button {
-  width: 8rem;
-  font-size: x-large;
+  width: 50%;
+  font-size: large;
+}
+
+@media screen and (min-width: $sm) {
+  .stop-button {
+    width: 10rem;
+    font-size: x-large;
+  }
 }
 
 @media screen and (max-width: ($sm - 1px) ) {
