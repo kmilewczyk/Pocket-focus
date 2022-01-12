@@ -1,0 +1,10 @@
+.touch-area {
+  -webkit-user-select: none;  
+  -moz-user-select: none;    
+  -ms-user-select: none;      
+  user-select: none;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  touch-action: none;
+}
