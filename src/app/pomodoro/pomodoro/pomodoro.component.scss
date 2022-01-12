@@ -28,5 +28,9 @@
 @media screen and (max-width: ($sm - 1px) ) {
   .bg-dark-at-xs {
     background: $dark;
-  }
+ }
+}
+
+.disabled {
+  opacity: 0.1;
 }

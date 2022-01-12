@@ -4,8 +4,10 @@
             <a class="navbar-brand h1" routerLink="/">Pomodoro app</a>
             <div>
                 <ng-content></ng-content>
-                <a role="button" class="text-light mx-1" routerLink="/settings" routerLinkActive #settingsRouteActive="routerLinkActive">
-                    <i *ngIf="settingsRouteActive.isActive; else inSettings" class="bi bi-gear-fill display-5" aria-label="Settings"></i>
+                <a role="button" class="text-light mx-1" routerLinkActive #settingsRouteActive="routerLinkActive"
+                    [routerLink]="settingsRouteActive.isActive ? '/' : '/settings'">
+                    <i *ngIf="settingsRouteActive.isActive; else inSettings" class="bi bi-gear-fill display-5"
+                        aria-label="Settings"></i>
                     <ng-template #inSettings>
                         <i class="bi bi-gear display-5" aria-label="Settings"></i>
                     </ng-template>
