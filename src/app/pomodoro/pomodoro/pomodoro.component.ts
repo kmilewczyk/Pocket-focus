@@ -1,12 +1,8 @@
-import { Component, MissingTranslationStrategy, OnInit } from '@angular/core';
+import { Component, MissingTranslationStrategy, OnInit, ViewChild } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations'
+import { TimerType } from '@app/shared/model/timer-type.model';
+import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
 
-
-enum TimerType {
-  Pomodoro,
-  Hour,
-  Indefinite
-};
 
 @Component({
   selector: 'app-pomodoro',

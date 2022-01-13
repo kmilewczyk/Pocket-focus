@@ -1,13 +1,12 @@
-<div>
+<div class="mb-4">
     <div class="text-center">
-        <div *ngIf="editMode; else normalView" class="d-flex align-items-center">
-            <button class="btn">
+        <div *ngIf="editMode; else normalView" class="d-flex align-items-center justify-content-center flex-wrap flex-sm-nowrap">
+            <button class="w-100 w-sm-25 btn btn-outline-light m-4" (click)="select.moveOneUp()">
                 <i class="bi bi-dash-circle display-5"></i>
             </button>
-            <h1 class="display-1 mx-sm-2">
-                <span class="time-display">30:00</span>
-            </h1>
-            <button class="btn">
+            <app-slidable-select sliderClass="bg-dark" [componentWidth]="18" [labels]="valueOptionsLabels"
+                [(selectedIndex)]="selection" #select></app-slidable-select>
+            <button class="w-100 w-sm-25 btn btn-outline-light m-4" (click)="select.moveOneDown()">
                 <i class="bi bi-plus-circle display-5"></i>
             </button>
         </div>

@@ -1,95 +1,67 @@
 import {
-  animate,
-  animateChild,
-  query,
-  state,
-  style,
-  transition,
-  trigger,
-  group,
-} from '@angular/animations';
-import {
+  AfterViewChecked,
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
+  Output,
   ViewChild,
 } from '@angular/core';
 import { Subscription, timer } from 'rxjs';
-
-enum ComponentAnimationState {
-  Normal = 'normal',
-  Changing = 'changing'
-}
-
-enum ValueAnimationState {
-  Normal = 'normal',
-  Selected = 'selected',
-}
+import { componentTrigger, valueTrigger } from './slidable-select.animation';
+import {
+  ComponentAnimationState,
+  ValueAnimationState,
+} from './slidable-select.model';
 
 @Component({
   selector: 'app-slidable-select',
   templateUrl: './slidable-select.component.html',
   styleUrls: ['./slidable-select.component.scss'],
-  animations: [
-    trigger('componentTrigger', [
-      state(
-        ComponentAnimationState.Normal,
-        style({
-          height: '{{ elementSize }}rem',
-        }),
-        { params: { elementSize: 5 } }
-      ),
-      state(
-        ComponentAnimationState.Changing,
-        style({
-          height: '{{ componentSize }}rem',
-          marginTop: '-{{ moveUp }}rem',
-        }),
-        { params: { componentSize: 10, moveUp: 2.5 } }
-      ),
-      transition(
-        ComponentAnimationState.Normal +
-          ' <=> ' +
-          ComponentAnimationState.Changing,
-        [group([query('@*', animateChild()), animate(200)])]
-      ),
-    ]),
-    trigger('valueTrigger', [
-      state(
-        ValueAnimationState.Selected,
-        style({
-          fontSize: '{{ boldFontSize }}rem',
-          fontWeight: 'bolder',
-        }),
-        { params: { boldFontSize: 2.5 } }
-      ),
-      state(
-        ValueAnimationState.Normal,
-        style({
-          fontSize: '{{ fontSize }}rem',
-        }),
-        { params: { fontSize: 2 } }
-      ),
-      transition(
-        ValueAnimationState.Normal + ' <=> ' + ValueAnimationState.Selected,
-        [animate(200)]
-      ),
-    ]),
-  ],
+  animations: [componentTrigger, valueTrigger],
 })
 export class SlidableSelectComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
-  readonly elementSize = 5; // in rem
-  readonly fontSize = 2.25;
-  readonly componentHeight = 10; // in rem
-  readonly componentWidth = 14; // in rem
   readonly selectDelay = 300; // in ms
 
-  @Input() values = [
+  @Input() elementSize = 5; // in rem
+  @Input() fontSize = 2.25;
+  @Input() componentHeight = 10; // in rem
+  @Input() componentWidth = 14; // in rem
+  @Input() sliderClass = '';
+
+  @Input()
+  get labels() {
+    return this.labelsValue;
+  }
+  set labels(value: string[]) {
+    this.labelsValue = value;
+
+    this.onLabelsUpdate();
+  }
+
+  @Output() selectedIndexChange = new EventEmitter<number>();
+  @Input()
+  get selectedIndex() {
+    return this.selectedIndexValue;
+  }
+  set selectedIndex(value: number) {
+    this.selectedIndexValue = value;
+    this.selectedIndexChange.emit(value);
+  }
+
+  @ViewChild('valuesWrapper') valuesWrapper?: ElementRef;
+
+  valueStates: ValueAnimationState[] = [];
+  componentState = ComponentAnimationState.Normal;
+
+  private selectedIndexValue: number = 1;
+  private labelsValue = [
     '20:00',
     '30:00',
     '60:00',
@@ -98,13 +70,6 @@ export class SlidableSelectComponent
     '150:00',
     '180:00',
   ];
-  @Input() selectedIndex: number = 1;
-
-  @ViewChild('valuesWrapper') valuesWrapper?: ElementRef;
-
-  valueStates: ValueAnimationState[] = [];
-  componentState = ComponentAnimationState.Normal;
-
   private timer?: Subscription;
   private pointerLastPositionY?: number;
   private previousSelectedElement?: number;
@@ -113,27 +78,38 @@ export class SlidableSelectComponent
     return this.valuesWrapper?.nativeElement as HTMLDivElement;
   }
 
-  get valuesView() {
-    return new Array(this.values.entries()).map(([index, value]) => {
-      return { text: value, animationState: index };
-    });
+  get userSelecting(): boolean {
+    return this.pointerLastPositionY !== undefined;
   }
 
-  constructor() {}
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.valueStates = Array(this.values?.length)?.fill(ValueAnimationState.Normal);
+    this.onLabelsUpdate();
   }
 
   ngAfterViewInit(): void {
-    this.scheduleCaptureAndFocusElement();
+    this.focusSelectedElement();
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
     this.timer?.unsubscribe();
   }
 
-  scrollOnPosition(clientY: number) {}
+  public moveOneDown() {
+    if (this.selectedIndex + 1 < this.labelsValue.length) {
+      this.selectedIndex += 1;
+      this.focusSelectedElement();
+    }
+  }
+
+  public moveOneUp() {
+    if (this.selectedIndex - 1 >= 0) {
+      this.selectedIndex -= 1;
+      this.focusSelectedElement();
+    }
+  }
 
   onWheel(event: WheelEvent) {
     const SCROLL_SPEED = 0.1;
@@ -143,7 +119,7 @@ export class SlidableSelectComponent
   onPointerDown(event: PointerEvent) {
     this.pointerLastPositionY = event.clientY;
     this.componentState = ComponentAnimationState.Changing;
-    this.timer?.unsubscribe();
+    this.scheduleFocusElement();
   }
 
   onPointerMove(event: PointerEvent) {
@@ -158,9 +134,10 @@ export class SlidableSelectComponent
     this.pointerLastPositionY = undefined;
   }
 
-  focusSelectedElement() {
+  private focusSelectedElement() {
     if (this.previousSelectedElement !== undefined) {
-      this.valueStates[this.previousSelectedElement] = ValueAnimationState.Normal;
+      this.valueStates[this.previousSelectedElement] =
+        ValueAnimationState.Normal;
     }
 
     const boundedIndex = this.boundedIndex(this.selectedIndex);
@@ -172,34 +149,24 @@ export class SlidableSelectComponent
 
     this.valueStates[boundedIndex] = ValueAnimationState.Selected;
 
-    desiredLi.scrollIntoView({ behavior: 'smooth' });
-    // desiredLi.scrollIntoView();
-
-    // In case user dragged the pointer off screen
-    this.pointerLastPositionY = undefined;
-
     this.previousSelectedElement = boundedIndex;
 
-    this.componentState = ComponentAnimationState.Normal;
+    desiredLi.scrollIntoView({ behavior: 'smooth' });
+
+    this.setComponentStateToNormal();
   }
 
-  boundedIndex(index: number) {
-    return Math.min(index, this.values.length - 1);
+  private boundedIndex(index: number) {
+    return Math.min(index, this.labels.length - 1);
   }
 
-  convertRemToPixels(rem: number) {
-    return (
-      rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
-    );
-  }
-
-  converPixelsToRem(pxs: number) {
+  private converPixelsToRem(pxs: number) {
     return (
       pxs / parseFloat(getComputedStyle(document.documentElement).fontSize)
     );
   }
 
-  scheduleCaptureAndFocusElement() {
+  private scheduleCaptureAndFocusElement() {
     const scrollHeight =
       this.converPixelsToRem(this.scrollDiv.scrollTop) +
       this.componentHeight / 2;
@@ -209,11 +176,24 @@ export class SlidableSelectComponent
     this.scheduleFocusElement();
   }
 
-  scheduleFocusElement() {
+  private scheduleFocusElement() {
     this.timer?.unsubscribe();
 
     this.timer = timer(this.selectDelay).subscribe(() =>
       this.focusSelectedElement()
     );
+  }
+
+  private onLabelsUpdate() {
+    this.valueStates = Array(this.labels?.length)?.fill(
+      ValueAnimationState.Normal
+    );
+  }
+
+  private setComponentStateToNormal() {
+    // In case user dragged the pointer off screen
+    this.pointerLastPositionY = undefined;
+
+    this.componentState = ComponentAnimationState.Normal;
   }
 }

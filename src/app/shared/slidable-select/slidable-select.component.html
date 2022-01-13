@@ -1,25 +1,28 @@
 <div class="row justify-content-center">
     <!-- This is area that user can move off to continue to interact -->
-    <div [style.width]="componentWidth + 'rem'" style="position: absolute; height: 100vh; top: 0"
-        (pointerup)="onPointerUp($event)" (pointermove)="onPointerMove($event)"></div>
+    <div [style.height]="userSelecting ? '100vh' : componentHeight + 'rem'" [style.width]="componentWidth + 'rem'"
+        style="position: absolute; top: 0" (pointerup)="onPointerUp($event)" (pointermove)="onPointerMove($event)">
+    </div>
 
     <!-- Component -->
     <div [style.width]="componentWidth + 'rem'" [style.height]="componentHeight + 'rem'" style="position: relative;"
-        class="bg-primary row justify-content-center"
+        class="row justify-content-center rounded-2"
         [@componentTrigger]="{ value: componentState, params: { componentSize: componentHeight, fontSize: fontSize, moveUp: (componentHeight-elementSize)/2 }}">
 
+        <!-- Center marker  -->
         <div class="touch-area d-flex align-items-center">
             <hr style="clip-path: polygon(0% 0%, 0% 100%, 25% 100%, 25% 0%);" class="w-100 border border-3">
             <hr style="clip-path: polygon(100% 100%, 100% 0%, 75% 0%, 75% 100%);" class="w-100 border border-3">
         </div>
 
         <!-- This is the element that is programatically scolled -->
-        <div style="height: 100%; overflow: hidden" class="row justify-content-center" #valuesWrapper>
+        <div style="height: 100%; overflow: hidden" [classList]="'row justify-content-center ' + sliderClass"
+            #valuesWrapper>
             <!-- This is list with all the values. It scrolles based on user input. -->
             <ul style="list-style-type: none;">
                 <div [style.height]="elementSize + 'rem'"></div>
                 <li [style.height]="elementSize + 'rem'" [style.line-height]="elementSize + 'rem'" class="h1"
-                    *ngFor="let value of values; let i = index" class="text-center"
+                    *ngFor="let value of labels; let i = index" class="text-center"
                     [@valueTrigger]="{ value: valueStates[i], params: { fontSize: fontSize, boldFontSize: fontSize + 0.5 }}">
                     {{ value }}
                 </li>

@@ -7,12 +7,16 @@
 <div *ngIf="goalsVisible" [@productivityVisible]="goalsVisible" class="row">
   <app-productivity></app-productivity>
 </div>
+
+<!-- Task title textare -->
 <div class="row mb-2">
   <div class="col-md-7 mx-auto p-3 bg-dark-at-xs rounded  mt-2">
     <textarea appStretch style="resize: none; overflow: hidden;" rows="1" class="task-title display-6 w-100 rounded-3"
       placeholder="Insert task title here." wrap="soft"></textarea>
   </div>
 </div>
+
+<!-- Edit and close buttons -->
 <div class="row mb-sm-n6">
   <div class="bg-dark-at-xs pb-4 col-sm-10 col-lg-7 col-xl-6 mx-auto d-flex">
     <button style="z-index: 2;" [class.disabled]="timerRunning" class="btn" (click)="onEditSwitch()">
@@ -24,10 +28,13 @@
     </button>
   </div>
 </div>
+
+<!-- The timer -->
 <div class="row mb-2">
   <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto bg-dark-at-xs">
     <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
       <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
+        <!-- Total time label -->
         <div *ngIf="editMode; else totalTimeLabel" class="text-center">
           <h3> Pick session duration </h3>
           <p> breaks included </p>
@@ -38,8 +45,12 @@
             <p>1 hour</p>
           </div>
         </ng-template>
+
+        <!-- The timer -->
         <app-timer [editMode]="this.editMode"></app-timer>
         <br />
+
+        <!-- Type switch button -->
         <button style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
           <h5 *ngIf="timerType === TimerType.Pomodoro">pomodoro</h5>
           <h5 *ngIf="timerType === TimerType.Hour">hour</h5>
@@ -49,10 +60,13 @@
     </div>
   </div>
 </div>
+
+<!-- Control timer buttons -->
 <div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
     <button *ngIf="timerRunning" class="btn btn-primary stop-button"> break </button>
-    <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1" (click)="timerRunning = true;">
+    <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1"
+      (click)="timerRunning = true;">
       <i [class]="timerRunning ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
     </button>
     <button *ngIf="timerRunning" class="btn btn-primary stop-button"> interrupt </button>
