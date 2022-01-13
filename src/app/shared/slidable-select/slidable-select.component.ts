@@ -114,6 +114,7 @@ export class SlidableSelectComponent
   onWheel(event: WheelEvent) {
     const SCROLL_SPEED = 0.1;
     this.scrollDiv.scrollBy(0, event.deltaY * SCROLL_SPEED);
+    this.scheduleCaptureAndFocusElement();
   }
 
   onPointerDown(event: PointerEvent) {
