@@ -34,7 +34,6 @@ export class SlidableSelectComponent
   @Input() componentHeight = 10; // in rem
   @Input() componentWidth = 14; // in rem
   @Input() sliderClass = '';
-
   @Input()
   get labels() {
     return this.labelsValue;
@@ -44,7 +43,6 @@ export class SlidableSelectComponent
 
     this.onLabelsUpdate();
   }
-
   @Output() selectedIndexChange = new EventEmitter<number>();
   @Input()
   get selectedIndex() {
@@ -53,6 +51,11 @@ export class SlidableSelectComponent
   set selectedIndex(value: number) {
     this.selectedIndexValue = value;
     this.selectedIndexChange.emit(value);
+
+    if (this.viewInitialised) {
+      // Skip the first initialization
+      this.focusSelectedElement();
+    }
   }
 
   @ViewChild('valuesWrapper') valuesWrapper?: ElementRef;
@@ -73,6 +76,7 @@ export class SlidableSelectComponent
   private timer?: Subscription;
   private pointerLastPositionY?: number;
   private previousSelectedElement?: number;
+  private viewInitialised = false;
 
   get scrollDiv(): HTMLDivElement {
     return this.valuesWrapper?.nativeElement as HTMLDivElement;
@@ -91,6 +95,7 @@ export class SlidableSelectComponent
   ngAfterViewInit(): void {
     this.focusSelectedElement();
     this.cdr.detectChanges();
+    this.viewInitialised = true;
   }
 
   ngOnDestroy(): void {

@@ -42,7 +42,7 @@
         <ng-template #totalTimeLabel>
           <div class="text-center">
             <h3>Total time</h3>
-            <p>1 hour</p>
+            <p>{{ totalTime }}</p>
           </div>
         </ng-template>
 
@@ -51,10 +51,10 @@
         <br />
 
         <!-- Type switch button -->
-        <button style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
-          <h5 *ngIf="timerType === TimerType.Pomodoro">pomodoro</h5>
-          <h5 *ngIf="timerType === TimerType.Hour">hour</h5>
-          <h5 *ngIf="timerType === TimerType.Indefinite">indefinite</h5>
+        <button *ngIf="timerType$" style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
+          <h5 *ngIf="(timerType$ | async) === TimerType.Pomodoro">pomodoro</h5>
+          <h5 *ngIf="(timerType$ | async) === TimerType.Hour">hour</h5>
+          <h5 *ngIf="(timerType$ | async) === TimerType.Indefinite">indefinite</h5>
         </button>
       </div>
     </div>
@@ -64,11 +64,11 @@
 <!-- Control timer buttons -->
 <div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
-    <button *ngIf="timerRunning" class="btn btn-primary stop-button"> break </button>
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button"> break </button>
     <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1"
       (click)="timerRunning = true;">
       <i [class]="timerRunning ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
     </button>
-    <button *ngIf="timerRunning" class="btn btn-primary stop-button"> interrupt </button>
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button"> interrupt </button>
   </div>
 </div>

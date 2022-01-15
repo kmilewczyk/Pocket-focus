@@ -2,6 +2,8 @@ import { Component, MissingTranslationStrategy, OnInit, ViewChild } from '@angul
 import { trigger, state, style, animate, transition } from '@angular/animations'
 import { TimerType } from '@app/shared/model/timer-type.model';
 import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
+import { SessionTimeService } from '@app/core/session-time/session-time.service';
+import { Observable, Observer, take } from 'rxjs';
 
 
 @Component({
@@ -27,20 +29,30 @@ import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-se
 export class PomodoroComponent implements OnInit {
   TimerType = TimerType;
 
-  timerType: TimerType = TimerType.Pomodoro;
+  timerType$?: Observable<TimerType>;
   goalsVisible = false;
   timerRunning = false;
   editMode = false;
 
-  constructor () {}
+  get totalTime() {
+    return "1 hour";
+  }
 
-  ngOnInit(): void {}
+  constructor (private sessionTime: SessionTimeService) {}
+
+  ngOnInit(): void {
+    this.timerType$ = this.sessionTime.timerType$;
+  }
 
   onTimerTypeSwitch() {
     const switchValues = [ TimerType.Pomodoro, TimerType.Hour, TimerType.Indefinite];
 
-    // Switch to the next in the array; wrap when at the last
-    this.timerType = switchValues[(switchValues.indexOf(this.timerType)+1) % switchValues.length];
+    this.timerType$?.pipe(take(1)).subscribe(timerType => {
+      // Switch to the next in the array; wrap when at the last
+      const newType = switchValues[(switchValues.indexOf(timerType)+1) % switchValues.length];
+
+      this.sessionTime.setTimerType(newType);
+    });
   }
 
   onClose () {
