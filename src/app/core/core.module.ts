@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { UserPreferencesService } from './user-preferences/user-preferences.service';
-import { SessionTimeService } from './session-time/session-time.service';
+import { TimerService } from './timer-service/timer.service';
 
 @NgModule({
   declarations: [],
@@ -11,7 +11,7 @@ import { SessionTimeService } from './session-time/session-time.service';
   ],
   providers: [
     UserPreferencesService,
-    SessionTimeService
+    TimerService
   ]
 })
 export class CoreModule { }

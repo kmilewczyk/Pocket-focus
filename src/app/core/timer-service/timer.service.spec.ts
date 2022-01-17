@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { SessionTimeService } from './session-time.service';
+import { TimerService } from './timer.service';
 
 describe('SessionTimeService', () => {
-  let service: SessionTimeService;
+  let service: TimerService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(SessionTimeService);
+    service = TestBed.inject(TimerService);
   });
 
   it('should be created', () => {

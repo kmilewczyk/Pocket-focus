@@ -37,12 +37,15 @@
         <!-- Total time label -->
         <div *ngIf="editMode; else totalTimeLabel" class="text-center">
           <h3> Pick session duration </h3>
-          <p> breaks included </p>
+          <p *ngIf="(timerType$ | async) !== TimerType.Indefinite; else indfBreakLabel"> breaks included </p>
+          <ng-template #indfBreakLabel>
+            <p> take a break only when you think you need one. </p>
+          </ng-template>
         </div>
         <ng-template #totalTimeLabel>
           <div class="text-center">
             <h3>Total time</h3>
-            <p>{{ totalTime }}</p>
+            <p>{{ totalTime$ | async }}</p>
           </div>
         </ng-template>
 
@@ -51,7 +54,8 @@
         <br />
 
         <!-- Type switch button -->
-        <button *ngIf="timerType$" style="min-width: 8rem" class="btn btn-outline-light" (click)="onTimerTypeSwitch()">
+        <button *ngIf="timerType$" [class.disabled]="!editMode" style="min-width: 8rem" class="btn btn-outline-light"
+          (click)="onTimerTypeSwitch()">
           <h5 *ngIf="(timerType$ | async) === TimerType.Pomodoro">pomodoro</h5>
           <h5 *ngIf="(timerType$ | async) === TimerType.Hour">hour</h5>
           <h5 *ngIf="(timerType$ | async) === TimerType.Indefinite">indefinite</h5>
@@ -64,11 +68,11 @@
 <!-- Control timer buttons -->
 <div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button"> break </button>
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onBreak()"> break </button>
     <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1"
-      (click)="timerRunning = true;">
+      (click)="onStart()">
       <i [class]="timerRunning ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
     </button>
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button"> interrupt </button>
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onInterrupt()"> interrupt </button>
   </div>
 </div>

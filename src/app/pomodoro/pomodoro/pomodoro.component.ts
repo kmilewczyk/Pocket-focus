@@ -1,30 +1,43 @@
-import { Component, MissingTranslationStrategy, OnInit, ViewChild } from '@angular/core';
-import { trigger, state, style, animate, transition } from '@angular/animations'
+import {
+  Component,
+  MissingTranslationStrategy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition,
+} from '@angular/animations';
 import { TimerType } from '@app/shared/model/timer-type.model';
 import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
-import { SessionTimeService } from '@app/core/session-time/session-time.service';
-import { Observable, Observer, take } from 'rxjs';
-
+import { TimerService } from '@app/core/timer-service/timer.service';
+import { map, Observable, Observer, take } from 'rxjs';
 
 @Component({
   selector: 'app-pomodoro',
   templateUrl: './pomodoro.component.html',
   styleUrls: ['./pomodoro.component.scss'],
   animations: [
-    trigger ('productivityVisible', [
-      state('in', style({
-        opacity: 1,
-      })),
+    trigger('productivityVisible', [
+      state(
+        'in',
+        style({
+          opacity: 1,
+        })
+      ),
       transition('void => *', [
-          style({
-            opacity: 0,
-            height: 0,
-            transform: 'translateY(-10rem)'
-          }),
-          animate('0.5s')
-      ])
-    ])
-  ]
+        style({
+          opacity: 0,
+          height: 0,
+          transform: 'translateY(-10rem)',
+        }),
+        animate('0.5s'),
+      ]),
+    ]),
+  ],
 })
 export class PomodoroComponent implements OnInit {
   TimerType = TimerType;
@@ -34,32 +47,65 @@ export class PomodoroComponent implements OnInit {
   timerRunning = false;
   editMode = false;
 
-  get totalTime() {
-    return "1 hour";
+  get totalTime$() {
+    return this.timerService.totalSessionTime$.pipe(
+      map((totalMinutes) => {
+        const hours = Math.floor(totalMinutes / 60);
+        const leftMinutes = totalMinutes % 60;
+        const hourLabel =
+          hours > 0 ? hours + (hours > 1 ? ' hours' : ' hour') : '';
+        const minuteLabel =
+          leftMinutes > 0
+            ? leftMinutes + (leftMinutes > 1 ? ' minutes' : ' minute')
+            : '';
+
+        return hourLabel + ' ' + minuteLabel;
+      })
+    );
   }
 
-  constructor (private sessionTime: SessionTimeService) {}
+  constructor(public timerService: TimerService) {}
 
   ngOnInit(): void {
-    this.timerType$ = this.sessionTime.timerType$;
+    this.timerType$ = this.timerService.timerType$;
+    this.timerRunning = this.timerService.isRunning();
   }
 
   onTimerTypeSwitch() {
-    const switchValues = [ TimerType.Pomodoro, TimerType.Hour, TimerType.Indefinite];
+    const switchValues = [
+      TimerType.Pomodoro,
+      TimerType.Hour,
+      TimerType.Indefinite,
+    ];
 
-    this.timerType$?.pipe(take(1)).subscribe(timerType => {
+    this.timerType$?.pipe(take(1)).subscribe((timerType) => {
       // Switch to the next in the array; wrap when at the last
-      const newType = switchValues[(switchValues.indexOf(timerType)+1) % switchValues.length];
+      const newType =
+        switchValues[
+          (switchValues.indexOf(timerType) + 1) % switchValues.length
+        ];
 
-      this.sessionTime.setTimerType(newType);
+      this.timerService.setTimerType(newType);
     });
   }
 
-  onClose () {
+  onClose() {
     this.timerRunning = false;
+    this.timerService.stopTimer();
   }
 
   onEditSwitch() {
     this.editMode = !this.editMode;
   }
+
+  onStart() {
+    this.timerRunning = true;
+    this.timerService.startTimer();
+  }
+
+  onBreak() {
+    this.timerService.DEBUG_almostSwitch();
+  }
+
+  onInterrupt() {}
 }

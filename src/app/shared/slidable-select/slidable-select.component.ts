@@ -54,7 +54,7 @@ export class SlidableSelectComponent
 
     if (this.viewInitialised) {
       // Skip the first initialization
-      this.focusSelectedElement();
+      this.scheduleFocusElement();
     }
   }
 
@@ -173,13 +173,17 @@ export class SlidableSelectComponent
   }
 
   private scheduleCaptureAndFocusElement() {
-    const scrollHeight =
-      this.converPixelsToRem(this.scrollDiv.scrollTop) +
-      this.componentHeight / 2;
-    const closestElement = Math.floor(scrollHeight / this.elementSize) - 1;
-    this.selectedIndex = closestElement;
+    this.timer?.unsubscribe();
 
-    this.scheduleFocusElement();
+    this.timer = timer(this.selectDelay).subscribe(() => {
+      const scrollHeight =
+        this.converPixelsToRem(this.scrollDiv.scrollTop) +
+        this.componentHeight / 2;
+      const closestElement = Math.floor(scrollHeight / this.elementSize) - 1;
+      this.selectedIndex = closestElement;
+
+      this.scheduleFocusElement();
+    });
   }
 
   private scheduleFocusElement() {

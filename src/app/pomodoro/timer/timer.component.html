@@ -1,6 +1,7 @@
 <div class="mb-4">
     <div class="text-center">
-        <div *ngIf="editMode; else normalView" class="d-flex align-items-center justify-content-center flex-wrap flex-sm-nowrap">
+        <div *ngIf="editMode; else normalView"
+            class="d-flex align-items-center justify-content-center flex-wrap flex-sm-nowrap">
             <button class="w-100 w-sm-25 btn btn-outline-light m-4" (click)="select.moveOneUp()">
                 <i class="bi bi-dash-circle display-5"></i>
             </button>
@@ -11,13 +12,24 @@
             </button>
         </div>
         <ng-template #normalView>
-            <div class="d-flex align-items-center">
+            <div class="d-flex justify-content-center">
                 <h1 class="display-1 mx-sm-2">
-                    <span class="time-display">25:00</span>
+                    <span class="time-display">
+                        {{ timeHours.toString().padStart(2, '0').concat(':').replace('00:', '') }}{{
+                        timeMinutes.toString().padStart(2, '0') }}:{{ timeSeconds.toString().padStart(2, '0')}}
+                    </span>
                 </h1>
             </div>
-            <p style="font-size: calc(1rem + 1vw)" class="text-muted">
-                05:00 break
+            <p *ngIf="timerState !== TimerState.Break" class="text-muted">
+                <span style="font-size: calc(1rem + 1vw)" *ngIf="timeBreakMinutes; else timeBreakInfo;">
+                    {{ timeBreakMinutes }} minute break
+                </span>
+                <ng-template #timeBreakInfo>
+                    <span style="font-size: calc(1rem + 0.5vw)">
+                        <p class="mb-0"> 1 minute per 5 minutes work. </p>
+                        <p class="mt-0"> 5 minutes minimum. </p>
+                    </span>
+                </ng-template>
             </p>
         </ng-template>
     </div>
