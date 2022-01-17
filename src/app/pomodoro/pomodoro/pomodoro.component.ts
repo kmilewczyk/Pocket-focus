@@ -90,7 +90,7 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
     this.timerSub = this.timerService.timer$.subscribe(tick => {
       this.timerState = tick.state;
-      this.minutesRemaining = Math.ceil(this.timerService.timeRemaining / 60);
+      this.updateTimeRemaining();
     })
   }
 
@@ -133,4 +133,8 @@ export class PomodoroComponent implements OnInit, OnDestroy {
   }
 
   onInterrupt() {}
+
+  private updateTimeRemaining() {
+    this.minutesRemaining = Math.ceil(this.timerService.timeRemaining / 60);
+  }
 }

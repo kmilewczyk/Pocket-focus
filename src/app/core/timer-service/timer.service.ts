@@ -41,6 +41,15 @@ export class TimerService implements OnDestroy {
     this.timeElapsedValue = value;
   }
 
+  // Time elapsed during the focus session
+  private focusSessionDurationValue = 0;
+  public get focusSessionDuration() {
+    return this.focusSessionDurationValue;
+  }
+  protected set focusSessionDuration(value: number) {
+    this.focusSessionDurationValue = value;
+  }
+
   public get timeRemaining() {
     return Math.max(0, this.totalSessionTimeMinutes.value * 60 - this.timeElapsed);
   }
@@ -71,12 +80,15 @@ export class TimerService implements OnDestroy {
     return this.timer.value;
   }
 
+  public getTotalSessionTime() {
+    return this.totalSessionTimeMinutes.value;
+  }
+
   public setTotalSessionTime(timeInMinutes: number) {
     this.totalSessionTimeMinutes.next(timeInMinutes);
   }
 
   public setTimerType(timerType: TimerType) {
-    this.timerType.next(timerType);
     switch (timerType) {
       case TimerType.Pomodoro:
         this.timerStrategy = new PomodoroTimerStrategy();
@@ -85,19 +97,17 @@ export class TimerService implements OnDestroy {
         this.timerStrategy = new HourTimerStrategy();
         break;
       case TimerType.Indefinite:
-        this.timerStrategy = new IndefiniteTimerStrategy();
+        this.timerStrategy = new IndefiniteTimerStrategy(this);
         break;
       default:
         throw new Error('Not implemented');
     }
+
+    this.timerType.next(timerType);
   }
 
-  public getBreakTime(timePassed: number) {
-    return Math.ceil(Math.min(5, timePassed / 5));
-  }
-
-  public get workPeriod(): number {
-    return this.timerStrategy.workPeriod();
+  public get focusPeriod(): number {
+    return this.timerStrategy.focusPeriod();
   }
 
   public get breakPeriod(): number {
@@ -129,6 +139,7 @@ export class TimerService implements OnDestroy {
 
   private switchState(data: NextState) {
     this.intervalSub?.unsubscribe();
+    this.focusSessionDuration = 0;
 
     if (data.state === TimerState.Dead) {
       this.timer.next({ state: TimerState.Dead })
@@ -143,6 +154,7 @@ export class TimerService implements OnDestroy {
     this.intervalSub = interval(1000).subscribe((_) => {
       const secondsLeft = this.timer.value.secondsLeft! - 1;
       this.timeElapsed += 1;
+      this.focusSessionDuration += 1;
 
       if (secondsLeft > 0) {
         this.timer.next({ secondsLeft: secondsLeft, state: data.state });

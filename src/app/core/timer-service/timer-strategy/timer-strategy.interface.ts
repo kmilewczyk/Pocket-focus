@@ -11,6 +11,6 @@ export interface TimerStrategy {
     // onRequestBreak();
     // onRequestInterruption
     onStateSwitch(timerService: TimerService): NextState;
-    workPeriod(): number;
+    focusPeriod(): number;
     breakPeriod(): number;
 }

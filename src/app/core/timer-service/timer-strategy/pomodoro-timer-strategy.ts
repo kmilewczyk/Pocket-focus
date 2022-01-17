@@ -3,7 +3,7 @@ import { TimerService } from '../timer.service';
 import { NextState, TimerStrategy } from './timer-strategy.interface';
 
 export class PomodoroTimerStrategy implements TimerStrategy {
-  workPeriod(): number {
+  focusPeriod(): number {
     return 25 * 60;
   }
 
@@ -12,7 +12,7 @@ export class PomodoroTimerStrategy implements TimerStrategy {
   }
 
   onStartTimer(timerService: TimerService): NextState {
-    return { state: TimerState.Work, stateDuration: this.workPeriod() };
+    return { state: TimerState.Work, stateDuration: this.focusPeriod() };
   }
 
   onStateSwitch(timerService: TimerService): NextState {
@@ -20,12 +20,15 @@ export class PomodoroTimerStrategy implements TimerStrategy {
       case TimerState.Work:
         return { state: TimerState.Break, stateDuration: this.breakPeriod() };
       case TimerState.Break:
-        const workTime = Math.min(timerService.timeRemaining, this.workPeriod());
+        const focusTime = Math.min(
+          timerService.timeRemaining,
+          this.focusPeriod()
+        );
 
         if (timerService.timeRemaining > 0) {
-            return { state: TimerState.Work, stateDuration: workTime};
+          return { state: TimerState.Work, stateDuration: focusTime };
         } else {
-            return { state: TimerState.Dead, stateDuration: 0 }
+          return { state: TimerState.Dead, stateDuration: 0 };
         }
       default:
         throw new Error(

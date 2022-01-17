@@ -198,6 +198,8 @@ export class SlidableSelectComponent
     this.valueStates = Array(this.labels?.length)?.fill(
       ValueAnimationState.Normal
     );
+
+    this.scheduleFocusElement();
   }
 
   private setComponentStateToNormal() {

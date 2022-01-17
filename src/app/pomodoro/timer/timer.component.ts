@@ -74,7 +74,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.timer = this.timerService.timer$.subscribe((tickData) => {
       this.timerState = tickData.state;
       if (this.timerState == TimerState.Dead) {
-        this.setTime(this.timerService.workPeriod);
+        this.setTime(this.timerService.focusPeriod);
       } else {
         this.setTime(tickData.secondsLeft!);
       }
@@ -106,6 +106,8 @@ export class TimerComponent implements OnInit, OnDestroy {
       default:
         throw new Error('Not implemented');
     }
+
+    this.setTime(this.timerService.focusPeriod);
   }
 
   onSelectionChange() {
@@ -120,6 +122,8 @@ export class TimerComponent implements OnInit, OnDestroy {
         this.timerService.setTotalSessionTime((this.selection + 1) * 60);
         break;
     }
+
+    this.setTime(this.timerService.focusPeriod);
   }
 
   private setTime(seconds: number) {
