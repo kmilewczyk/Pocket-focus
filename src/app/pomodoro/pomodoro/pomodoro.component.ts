@@ -1,6 +1,7 @@
 import {
   Component,
   MissingTranslationStrategy,
+  OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
@@ -14,7 +15,8 @@ import {
 import { TimerType } from '@app/shared/model/timer-type.model';
 import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
 import { TimerService } from '@app/core/timer-service/timer.service';
-import { map, Observable, Observer, take } from 'rxjs';
+import { map, Observable, Observer, Subscription, take } from 'rxjs';
+import { TimerState } from '@app/shared/model/timer-state.model';
 
 @Component({
   selector: 'app-pomodoro',
@@ -39,12 +41,27 @@ import { map, Observable, Observer, take } from 'rxjs';
     ]),
   ],
 })
-export class PomodoroComponent implements OnInit {
+export class PomodoroComponent implements OnInit, OnDestroy {
   TimerType = TimerType;
+  TimerState = TimerState;
 
   timerType$?: Observable<TimerType>;
+
+  timerSub?: Subscription;
+
   goalsVisible = false;
+
   timerRunning = false;
+  
+  timerStateValue?: TimerState;
+  get timerState(): TimerState | undefined {
+    return this.timerStateValue
+  }
+  set timerState(value: TimerState | undefined) {
+    this.timerStateValue = value;
+    this.timerRunning = value !== TimerState.Dead;
+  }
+
   editMode = false;
 
   get totalTime$() {
@@ -68,7 +85,14 @@ export class PomodoroComponent implements OnInit {
 
   ngOnInit(): void {
     this.timerType$ = this.timerService.timerType$;
-    this.timerRunning = this.timerService.isRunning();
+
+    this.timerSub = this.timerService.timer$.subscribe(tick => {
+      this.timerState = tick.state;
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.timerSub?.unsubscribe();
   }
 
   onTimerTypeSwitch() {
@@ -90,7 +114,6 @@ export class PomodoroComponent implements OnInit {
   }
 
   onClose() {
-    this.timerRunning = false;
     this.timerService.stopTimer();
   }
 
@@ -99,7 +122,6 @@ export class PomodoroComponent implements OnInit {
   }
 
   onStart() {
-    this.timerRunning = true;
     this.timerService.startTimer();
   }
 

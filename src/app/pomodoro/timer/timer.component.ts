@@ -113,11 +113,11 @@ export class TimerComponent implements OnInit, OnDestroy {
       case TimerType.Indefinite:
       case TimerType.Pomodoro:
         this.timerService.setTotalSessionTime(
-          this.selection === 0 ? 20 : this.selection * 30
+          (this.selection + 1) * 30
         );
         break;
       case TimerType.Hour:
-        this.timerService.setTotalSessionTime(this.selection * 60);
+        this.timerService.setTotalSessionTime((this.selection + 1) * 60);
         break;
     }
   }

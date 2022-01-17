@@ -34,19 +34,26 @@
   <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto bg-dark-at-xs">
     <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
       <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
-        <!-- Total time label -->
-        <div *ngIf="editMode; else totalTimeLabel" class="text-center">
+        <!-- Upper label -->
+        <div *ngIf="editMode; else contextUpperLabel" class="text-center">
           <h3> Pick session duration </h3>
           <p *ngIf="(timerType$ | async) !== TimerType.Indefinite; else indfBreakLabel"> breaks included </p>
           <ng-template #indfBreakLabel>
             <p> take a break only when you think you need one. </p>
           </ng-template>
         </div>
-        <ng-template #totalTimeLabel>
-          <div class="text-center">
-            <h3>Total time</h3>
-            <p>{{ totalTime$ | async }}</p>
+        <ng-template #contextUpperLabel>
+          <div *ngIf="timerRunning; else totalTimeLabel" class="text-center h1 display-1">
+            <span *ngIf="timerState === TimerState.Work"> Focus </span>
+            <span *ngIf="timerState === TimerState.Break"> Break </span>
+            <span *ngIf="timerState === TimerState.Interruption"> Interruption </span>
           </div>
+          <ng-template #totalTimeLabel>
+            <div class="text-center">
+              <h3>Total time</h3>
+              <p>{{ totalTime$ | async }}</p>
+            </div>
+          </ng-template>
         </ng-template>
 
         <!-- The timer -->
@@ -68,11 +75,12 @@
 <!-- Control timer buttons -->
 <div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onBreak()"> break </button>
-    <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1"
-      (click)="onStart()">
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onBreak()"> break
+    </button>
+    <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1" (click)="onStart()">
       <i [class]="timerRunning ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
     </button>
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onInterrupt()"> interrupt </button>
+    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onInterrupt()">
+      interrupt </button>
   </div>
 </div>
