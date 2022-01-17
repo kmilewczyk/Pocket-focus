@@ -44,6 +44,9 @@
         </div>
         <ng-template #contextUpperLabel>
           <div *ngIf="timerRunning; else totalTimeLabel" class="text-center h1 display-1">
+            <h5 style="font-weight: normal; opacity: 0.8;">
+              {{ minutesRemaining > 1 ? minutesRemaining + " minutes remaining" : "less than a minute left" }}
+            </h5>
             <span *ngIf="timerState === TimerState.Work"> Focus </span>
             <span *ngIf="timerState === TimerState.Break"> Break </span>
             <span *ngIf="timerState === TimerState.Interruption"> Interruption </span>

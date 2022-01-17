@@ -64,6 +64,8 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
   editMode = false;
 
+  minutesRemaining = 0;
+
   get totalTime$() {
     return this.timerService.totalSessionTime$.pipe(
       map((totalMinutes) => {
@@ -88,6 +90,7 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
     this.timerSub = this.timerService.timer$.subscribe(tick => {
       this.timerState = tick.state;
+      this.minutesRemaining = Math.ceil(this.timerService.timeRemaining / 60);
     })
   }
 

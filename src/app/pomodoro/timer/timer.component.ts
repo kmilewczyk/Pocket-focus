@@ -74,7 +74,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.timer = this.timerService.timer$.subscribe((tickData) => {
       this.timerState = tickData.state;
       if (this.timerState == TimerState.Dead) {
-        this.setTime(this.timerService.workPeriod * 60);
+        this.setTime(this.timerService.workPeriod);
       } else {
         this.setTime(tickData.secondsLeft!);
       }

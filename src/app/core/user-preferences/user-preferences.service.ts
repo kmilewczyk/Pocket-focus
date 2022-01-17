@@ -5,7 +5,8 @@ export type UserPreferences = {
   hideGoalToggle: boolean,
   hideScheduleToggle: boolean,
   enableGoalFunctionality: boolean,
-  enableScheduleFunctionality: boolean
+  enableScheduleFunctionality: boolean,
+  skipLastBreak: boolean,
 };
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UserPreferencesService {
     hideScheduleToggle: false,
     enableGoalFunctionality: false,
     enableScheduleFunctionality: false,
+    skipLastBreak: false,
   });
 
   constructor() {}

@@ -11,7 +11,10 @@ import { NextState, TimerStrategy } from './timer-strategy/timer-strategy.interf
   providedIn: 'root',
 })
 export class TimerService implements OnDestroy {
+  // Observable for the timer's type
   private timerType = new BehaviorSubject<TimerType>(TimerType.Pomodoro);
+
+  // Observable for timer current state
   private timer = new BehaviorSubject<{
     secondsLeft?: number;
     state: TimerState;
@@ -28,6 +31,19 @@ export class TimerService implements OnDestroy {
 
   // Strategy for TimerType behaviour
   private timerStrategy: TimerStrategy = new PomodoroTimerStrategy();
+
+  // Total time elapsed
+  private timeElapsedValue = 0;
+  public get timeElapsed() {
+    return this.timeElapsedValue;
+  }
+  protected set timeElapsed(value: number) {
+    this.timeElapsedValue = value;
+  }
+
+  public get timeRemaining() {
+    return Math.max(0, this.totalSessionTimeMinutes.value * 60 - this.timeElapsed);
+  }
 
   constructor() {}
 
@@ -50,8 +66,8 @@ export class TimerService implements OnDestroy {
   public get sessionTimeLeft$() {
     return this.sessionTimeLeft.asObservable();
   }
-  
-  public getTime() {
+
+  public getTimer() {
     return this.timer.value;
   }
 
@@ -72,7 +88,7 @@ export class TimerService implements OnDestroy {
         this.timerStrategy = new IndefiniteTimerStrategy();
         break;
       default:
-        throw new Error("Not implemented")
+        throw new Error('Not implemented');
     }
   }
 
@@ -89,20 +105,22 @@ export class TimerService implements OnDestroy {
   }
 
   public startTimer() {
+    this.timeElapsed = 0;
+
     this.switchState(this.timerStrategy.onStartTimer(this));
   }
 
   public stopTimer() {
     this.intervalSub?.unsubscribe();
-    this.timer.next({ state: TimerState.Dead })
+    this.timer.next({ state: TimerState.Dead });
   }
 
   public requestBreak() {
-    throw new Error("Not implemented")
+    throw new Error('Not implemented');
   }
 
   public requestInterruption() {
-    throw new Error("Not implemented")
+    throw new Error('Not implemented');
   }
 
   public isRunning(): boolean {
@@ -112,13 +130,20 @@ export class TimerService implements OnDestroy {
   private switchState(data: NextState) {
     this.intervalSub?.unsubscribe();
 
+    if (data.state === TimerState.Dead) {
+      this.timer.next({ state: TimerState.Dead })
+      return;
+    }
+
     this.timer.next({
-      secondsLeft: data.stateDuration * 60,
-      state: data.state
+      secondsLeft: data.stateDuration,
+      state: data.state,
     });
 
     this.intervalSub = interval(1000).subscribe((_) => {
       const secondsLeft = this.timer.value.secondsLeft! - 1;
+      this.timeElapsed += 1;
+
       if (secondsLeft > 0) {
         this.timer.next({ secondsLeft: secondsLeft, state: data.state });
       } else {
@@ -129,7 +154,8 @@ export class TimerService implements OnDestroy {
 
   public DEBUG_almostSwitch() {
     const state = this.timer.value.state;
+    this.timeElapsed += this.timer.value.secondsLeft!-3;
 
-    this.timer.next({ secondsLeft: 3, state: state })
+    this.timer.next({ secondsLeft: 3, state: state });
   }
 }

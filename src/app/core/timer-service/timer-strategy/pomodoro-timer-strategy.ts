@@ -4,11 +4,11 @@ import { NextState, TimerStrategy } from './timer-strategy.interface';
 
 export class PomodoroTimerStrategy implements TimerStrategy {
   workPeriod(): number {
-    return 25;
+    return 25 * 60;
   }
 
   breakPeriod(): number {
-    return 5;
+    return 5 * 60;
   }
 
   onStartTimer(timerService: TimerService): NextState {
@@ -16,14 +16,20 @@ export class PomodoroTimerStrategy implements TimerStrategy {
   }
 
   onStateSwitch(timerService: TimerService): NextState {
-    switch (timerService.getTime().state) {
+    switch (timerService.getTimer().state) {
       case TimerState.Work:
         return { state: TimerState.Break, stateDuration: this.breakPeriod() };
       case TimerState.Break:
-        return { state: TimerState.Work, stateDuration: this.workPeriod() };
+        const workTime = Math.min(timerService.timeRemaining, this.workPeriod());
+
+        if (timerService.timeRemaining > 0) {
+            return { state: TimerState.Work, stateDuration: workTime};
+        } else {
+            return { state: TimerState.Dead, stateDuration: 0 }
+        }
       default:
         throw new Error(
-          'Argument Invalid for onstateSwitch: ' + timerService.getTime().state
+          'Argument Invalid for onstateSwitch: ' + timerService.getTimer().state
         );
     }
   }
