@@ -10,7 +10,7 @@ export class IndefiniteTimerStrategy implements TimerStrategy {
   }
 
   breakPeriod(): number {
-    return this.getBreakTime(this.timerService.focusSessionDuration);
+    return this.timerService.getBreakTime(this.timerService.focusSessionDuration);
   }
 
   onStartTimer(timerService: TimerService): NextState {
@@ -32,9 +32,5 @@ export class IndefiniteTimerStrategy implements TimerStrategy {
           'Argument Invalid for onstateSwitch: ' + timerService.getTimer().state
         );
     }
-  }
-
-  private getBreakTime(timePassed: number) {
-    return Math.ceil(Math.min(5, timePassed / 5));
   }
 }

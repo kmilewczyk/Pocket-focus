@@ -126,7 +126,11 @@ export class TimerService implements OnDestroy {
   }
 
   public requestBreak() {
-    throw new Error('Not implemented');
+    this.switchState({ state: TimerState.Break, stateDuration: this.getBreakTime(this.focusSessionDuration) });
+  }
+
+  public getBreakTime(timePassed: number) {
+    return Math.ceil(Math.max(5 * 60, timePassed / 5));
   }
 
   public requestInterruption() {

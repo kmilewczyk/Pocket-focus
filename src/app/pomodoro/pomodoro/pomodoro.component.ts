@@ -129,10 +129,12 @@ export class PomodoroComponent implements OnInit, OnDestroy {
   }
 
   onBreak() {
-    this.timerService.DEBUG_almostSwitch();
+    this.timerService.requestBreak();
   }
 
-  onInterrupt() {}
+  onInterrupt() {
+    this.timerService.DEBUG_almostSwitch();
+  }
 
   private updateTimeRemaining() {
     this.minutesRemaining = Math.ceil(this.timerService.timeRemaining / 60);
