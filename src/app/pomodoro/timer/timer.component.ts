@@ -23,9 +23,26 @@ const pomodoroOptionLabels = [
   '3:00:00',
   '3:30:00',
   '4:00:00',
+  '4:30:00',
+  '5:00:00',
+  '5:30:00',
+  '6:00:00',
+  '6:30:00',
+  '7:00:00',
+  '7:30:00',
+  '8:00:00',
 ];
 
-const hourOptionLabels = ['1:00:00', '2:00:00', '3:00:00', '4:00:00'];
+const hourOptionLabels = [
+  '1:00:00',
+  '2:00:00',
+  '3:00:00',
+  '4:00:00', 
+  '5:00:00', 
+  '6:00:00', 
+  '7:00:00', 
+  '8:00:00', 
+];
 
 @Component({
   selector: 'app-timer',
@@ -73,10 +90,20 @@ export class TimerComponent implements OnInit, OnDestroy {
 
     this.timer = this.timerService.timer$.subscribe((tickData) => {
       this.timerState = tickData.state;
-      if (this.timerState == TimerState.Dead) {
-        this.setTime(this.timerService.focusPeriod);
-      } else {
-        this.setTime(tickData.secondsLeft!);
+      switch(this.timerState) {
+        case TimerState.Dead:
+          this.setTime(this.timerService.focusPeriod);
+          break;
+        case TimerState.Paused:
+          this.setTime(0);
+          break;
+        case TimerState.Break:
+        case TimerState.Interruption:
+        case TimerState.Work:
+          this.setTime(tickData.secondsLeft!);
+          break;
+        default:
+          throw new Error("Unhandled TimerState " + this.TimerState + " at timer.component");
       }
     });
   }

@@ -19,11 +19,11 @@
 <!-- Edit and close buttons -->
 <div class="row mb-sm-n6">
   <div class="bg-dark-at-xs pb-4 col-sm-10 col-lg-7 col-xl-6 mx-auto d-flex">
-    <button style="z-index: 2;" [class.disabled]="timerRunning" class="btn" (click)="onEditSwitch()">
+    <button style="z-index: 2;" [class.disabled]="timerActivated" class="btn" (click)="onEditSwitch()">
       <i [class]="editMode ? 'bi-pencil-fill' : 'bi-pencil'" class="bi display-3"></i>
     </button>
     <div class="w-100"></div>
-    <button style="z-index: 2;" [class.disabled]="!timerRunning" class="btn" (click)="onClose()">
+    <button style="z-index: 2;" [class.disabled]="!timerActivated" class="btn" (click)="onClose()">
       <i class="bi bi-x-circle display-3"></i>
     </button>
   </div>
@@ -34,7 +34,7 @@
   <div class="d-flex justify-content-center col-sm-10 col-lg-7 col-xl-6 mx-auto bg-dark-at-xs">
     <div class="flex-grow-1 pomodoro-timer rounded-sm-circle bg-dark pb-4 pt-sm-5">
       <div class="d-flex flex-column align-items-center justify-content-center h-100 p-2">
-        <!-- Upper label -->
+        <!-- Upper label on edit -->
         <div *ngIf="editMode; else contextUpperLabel" class="text-center">
           <h3> Pick session duration </h3>
           <p *ngIf="(timerType$ | async) !== TimerType.Indefinite; else indfBreakLabel"> breaks included </p>
@@ -42,15 +42,26 @@
             <p> take a break only when you think you need one. </p>
           </ng-template>
         </div>
+
+        <!-- Upper label when not on edit -->
         <ng-template #contextUpperLabel>
-          <div *ngIf="timerRunning; else totalTimeLabel" class="text-center h1 display-1">
+          <!-- Label when running -->
+          <div *ngIf="timerActivated; else totalTimeLabel" class="text-center h1 display-1">
             <h5 style="font-weight: normal; opacity: 0.8;">
               {{ minutesRemaining > 1 ? minutesRemaining + " minutes remaining" : "less than a minute left" }}
             </h5>
-            <span *ngIf="timerState === TimerState.Work"> Focus </span>
-            <span *ngIf="timerState === TimerState.Break"> Break </span>
-            <span *ngIf="timerState === TimerState.Interruption"> Interruption </span>
+            <div [ngSwitch]="timerState">
+              <span *ngSwitchCase="TimerState.Work"> Focus </span>
+              <span *ngSwitchCase="TimerState.Break"> Break </span>
+              <span *ngSwitchCase="TimerState.Interruption">
+                <span> Interruption </span>
+                <div class="h6 mt-1 text-muted"> Click "continue" to resume focus session after the timer runs out. </div>
+              </span>
+              <span *ngSwitchCase="TimerState.Paused"> Paused </span>
+            </div>
           </div>
+
+          <!-- Label when not running -->
           <ng-template #totalTimeLabel>
             <div class="text-center">
               <h3>Total time</h3>
@@ -61,14 +72,13 @@
 
         <!-- The timer -->
         <app-timer [editMode]="this.editMode"></app-timer>
-        <br />
 
         <!-- Type switch button -->
         <button *ngIf="timerType$" [class.disabled]="!editMode" style="min-width: 8rem" class="btn btn-outline-light"
           (click)="onTimerTypeSwitch()">
-          <h5 *ngIf="(timerType$ | async) === TimerType.Pomodoro">pomodoro</h5>
-          <h5 *ngIf="(timerType$ | async) === TimerType.Hour">hour</h5>
-          <h5 *ngIf="(timerType$ | async) === TimerType.Indefinite">indefinite</h5>
+          <h5 *ngIf="(timerType$ | async) === TimerType.Pomodoro"> pomodoro </h5>
+          <h5 *ngIf="(timerType$ | async) === TimerType.Hour"> hour </h5>
+          <h5 *ngIf="(timerType$ | async) === TimerType.Indefinite"> indefinite </h5>
         </button>
       </div>
     </div>
@@ -78,12 +88,28 @@
 <!-- Control timer buttons -->
 <div class="row bg-dark-at-xs py-3">
   <div class="d-flex justify-content-center mx-auto">
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onBreak()"> break
+    <button [class.disabled]="!timerActivated || editMode || timerState !== TimerState.Work"
+      class="btn btn-primary stop-button" (click)="onBreak()"> break
     </button>
-    <button [class.disabled]="timerRunning || editMode" class="btn btn-lg btn-primary mx-1" (click)="onStart()">
-      <i [class]="timerRunning ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
+
+    <button [class.disabled]="timerActivated || editMode" class="btn btn-lg btn-primary mx-1" (click)="onStart()">
+      <i [class]="timerActivated ? 'bi-play-fill' : 'bi-play'" class="bi display-5"></i>
     </button>
-    <button [class.disabled]="!timerRunning || editMode" class="btn btn-primary stop-button" (click)="onInterrupt()">
-      interrupt </button>
+
+    <button [class.disabled]="!timerActivated || editMode"
+      class="btn btn-primary stop-button" (click)="onInterrupt()" [ngSwitch]="timerState">
+      <span *ngSwitchCase="TimerState.Interruption">
+        <span *ngIf="(pauseAfterInterruption$ | async); else pauseAfterInterruptionLabel"> continue </span>
+        <ng-template #pauseAfterInterruptionLabel> <span> pause </span> </ng-template>
+      </span>
+      <span *ngSwitchCase="TimerState.Paused"> resume </span>
+      <span *ngSwitchDefault> interrupt </span>
+    </button>
   </div>
+</div>
+
+<div *ngIf="!production" class="row bg-dark-at-xs justify-content-center">
+  <button class="btn btn-secondary col-1" (click)="onDebug()">
+    DEBUG
+  </button>
 </div>

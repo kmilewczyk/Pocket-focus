@@ -21,6 +21,8 @@ export class IndefiniteTimerStrategy implements TimerStrategy {
     switch (timerService.getTimer().state) {
       case TimerState.Work:
         return { state: TimerState.Dead, stateDuration: 0 }
+      case TimerState.Interruption:
+      case TimerState.Paused:
       case TimerState.Break:
         if (timerService.timeRemaining > 0) {
           return { state: TimerState.Work, stateDuration: timerService.timeRemaining };

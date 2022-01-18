@@ -1,9 +1,7 @@
 import {
   Component,
-  MissingTranslationStrategy,
   OnDestroy,
   OnInit,
-  ViewChild,
 } from '@angular/core';
 import {
   trigger,
@@ -13,10 +11,10 @@ import {
   transition,
 } from '@angular/animations';
 import { TimerType } from '@app/shared/model/timer-type.model';
-import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
 import { TimerService } from '@app/core/timer-service/timer.service';
-import { map, Observable, Observer, Subscription, take } from 'rxjs';
+import { map, Observable, Subscription, take } from 'rxjs';
 import { TimerState } from '@app/shared/model/timer-state.model';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-pomodoro',
@@ -42,6 +40,8 @@ import { TimerState } from '@app/shared/model/timer-state.model';
   ],
 })
 export class PomodoroComponent implements OnInit, OnDestroy {
+  production = environment.production;
+
   TimerType = TimerType;
   TimerState = TimerState;
 
@@ -51,7 +51,7 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
   goalsVisible = false;
 
-  timerRunning = false;
+  timerActivated = false;
   
   timerStateValue?: TimerState;
   get timerState(): TimerState | undefined {
@@ -59,12 +59,15 @@ export class PomodoroComponent implements OnInit, OnDestroy {
   }
   set timerState(value: TimerState | undefined) {
     this.timerStateValue = value;
-    this.timerRunning = value !== TimerState.Dead;
+    this.timerActivated = value !== TimerState.Dead;
   }
 
   editMode = false;
 
   minutesRemaining = 0;
+
+  pauseAfterInterruption$?: Observable<boolean>;
+
 
   get totalTime$() {
     return this.timerService.totalSessionTime$.pipe(
@@ -87,6 +90,7 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.timerType$ = this.timerService.timerType$;
+    this.pauseAfterInterruption$ = this.timerService.pauseAfterInterruption$;
 
     this.timerSub = this.timerService.timer$.subscribe(tick => {
       this.timerState = tick.state;
@@ -133,7 +137,31 @@ export class PomodoroComponent implements OnInit, OnDestroy {
   }
 
   onInterrupt() {
-    this.timerService.DEBUG_almostSwitch();
+    switch(this.timerState) {
+      case TimerState.Work:
+      case TimerState.Break:
+        this.timerService.requestInterruption();
+        break
+      case TimerState.Interruption:
+        this.timerService.pauseAfterInterruption$.pipe(take(1)).subscribe(shouldPause => {
+          if (shouldPause) {
+            this.timerService.removePauseAfterInterruption();
+          } else {
+            this.timerService.addPauseAfterInterruption();
+          }
+        });
+        break;
+      case TimerState.Paused:
+        this.timerService.resumeTimer();
+        break;
+      default:
+        throw new Error("Unhandled state onInterrupt " + this.timerState);
+    }
+  }
+
+  onDebug() {
+    if (!environment.production)
+      this.timerService.DEBUG_almostSwitch!();
   }
 
   private updateTimeRemaining() {

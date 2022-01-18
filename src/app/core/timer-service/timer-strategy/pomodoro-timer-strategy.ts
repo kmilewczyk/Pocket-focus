@@ -19,6 +19,8 @@ export class PomodoroTimerStrategy implements TimerStrategy {
     switch (timerService.getTimer().state) {
       case TimerState.Work:
         return { state: TimerState.Break, stateDuration: this.breakPeriod() };
+      case TimerState.Interruption:
+      case TimerState.Paused:
       case TimerState.Break:
         const focusTime = Math.min(
           timerService.timeRemaining,

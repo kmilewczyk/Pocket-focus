@@ -16,6 +16,8 @@ export class HourTimerStrategy implements TimerStrategy {
     switch (timerService.getTimer().state) {
       case TimerState.Work:
         return { state: TimerState.Break, stateDuration: this.breakPeriod() };
+      case TimerState.Paused:
+      case TimerState.Interruption:
       case TimerState.Break:
         const focusTime = Math.min(
           timerService.timeRemaining,
