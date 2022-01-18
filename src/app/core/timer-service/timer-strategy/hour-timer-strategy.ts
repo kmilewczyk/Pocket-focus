@@ -10,11 +10,11 @@ export class HourTimerStrategy implements TimerStrategy {
     return 10 * 60;
   }
   onStartTimer(timerService: TimerService): NextState {
-    return { state: TimerState.Work, stateDuration: this.focusPeriod() };
+    return { state: TimerState.Focus, stateDuration: this.focusPeriod() };
   }
   onStateSwitch(timerService: TimerService): NextState {
     switch (timerService.getTimer().state) {
-      case TimerState.Work:
+      case TimerState.Focus:
         return { state: TimerState.Break, stateDuration: this.breakPeriod() };
       case TimerState.Paused:
       case TimerState.Interruption:
@@ -25,7 +25,7 @@ export class HourTimerStrategy implements TimerStrategy {
         );
 
         if (timerService.timeRemaining > 0) {
-          return { state: TimerState.Work, stateDuration: focusTime };
+          return { state: TimerState.Focus, stateDuration: focusTime };
         } else {
           return { state: TimerState.Dead, stateDuration: 0 };
         }

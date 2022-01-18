@@ -44,11 +44,6 @@ export class TimerComponent implements OnInit, OnDestroy {
 
   @Input() editMode = false;
 
-  timer?: Subscription;
-  timerTypeSub?: Subscription;
-
-  timerType?: TimerType;
-
   get selection() {
     return this.selectionValue;
   }
@@ -57,13 +52,16 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.onSelectionChange();
   }
 
-  selectionValue = 0;
-
-  valueOptionsLabels = pomodoroOptionLabels;
-
   timeHours = 0;
   timeMinutes = 0;
   timeSeconds = 0;
+  valueOptionsLabels = pomodoroOptionLabels;
+
+  private timer?: Subscription;
+  private timerTypeSub?: Subscription;
+
+  private selectionValue = 0;
+  private timerType?: TimerType;
 
   constructor(private timerService: TimerService) {}
 
@@ -130,7 +128,7 @@ export class TimerComponent implements OnInit, OnDestroy {
         break;
       case TimerState.Break:
       case TimerState.Interruption:
-      case TimerState.Work:
+      case TimerState.Focus:
         this.setTime(tick.secondsLeft!);
         break;
       default:

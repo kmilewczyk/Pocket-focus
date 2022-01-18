@@ -16,7 +16,7 @@
                 {{ ((minutesRemaining$ | async | default:-1) > 1) ? (minutesRemaining$ | async) + " minutes remaining" : "less than a minute left" }}
             </h5>
             <div [ngSwitch]="(timerState$ | async)">
-                <span *ngSwitchCase="TimerState.Work"> Focus </span>
+                <span *ngSwitchCase="TimerState.Focus"> Focus </span>
                 <span *ngSwitchCase="TimerState.Break"> Break </span>
                 <span *ngSwitchCase="TimerState.Interruption">
                     <span> Interruption </span>

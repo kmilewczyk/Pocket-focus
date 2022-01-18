@@ -1,4 +1,5 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { getBreakTime } from '@app/shared';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerType } from '@app/shared/model/timer-type.model';
 import {
@@ -43,14 +44,8 @@ export class TimerService implements OnDestroy {
   // Strategy for TimerType behaviour
   private timerStrategy: TimerStrategy = new PomodoroTimerStrategy();
 
-  // Total time elapsed
-  private timeElapsedValue = 0;
-  public get timeElapsed() {
-    return this.timeElapsedValue;
-  }
-  protected set timeElapsed(value: number) {
-    this.timeElapsedValue = value;
-  }
+  // Total time elapsed in
+  private timeElapsed = 0;
 
   // Time elapsed during the focus session
   private focusSessionDurationValue = 0;
@@ -141,22 +136,18 @@ export class TimerService implements OnDestroy {
   public requestBreak() {
     this.switchState({
       state: TimerState.Break,
-      stateDuration: this.getBreakTime(this.focusSessionDuration),
+      stateDuration: getBreakTime(this.focusSessionDuration),
     });
-  }
-
-  public getBreakTime(timePassed: number) {
-    return Math.ceil(Math.max(5 * 60, timePassed / 5));
   }
 
   public requestInterruption() {
     const currentTimer = this.timer.value;
 
     switch (currentTimer.state) {
-      case TimerState.Work:
+      case TimerState.Focus:
         this.switchState({
           state: TimerState.Interruption,
-          stateDuration: this.getBreakTime(this.focusSessionDuration),
+          stateDuration: getBreakTime(this.focusSessionDuration),
         });
         break;
       case TimerState.Break:
@@ -173,10 +164,6 @@ export class TimerService implements OnDestroy {
     }
 
     this.pauseAfterInterruption.next(true);
-  }
-
-  public isRunning(): boolean {
-    return this.timer.value.state !== TimerState.Dead;
   }
 
   public resumeTimer() {
@@ -213,7 +200,7 @@ export class TimerService implements OnDestroy {
       const currentState = this.timer.value.state;
       this.timeElapsed += 1;
 
-      if (currentState === TimerState.Work) {
+      if (currentState === TimerState.Focus) {
         this.focusSessionDuration += 1;
       }
 

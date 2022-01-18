@@ -1,5 +1,5 @@
 export enum TimerState {
-    Work,
+    Focus,
     Break,
     Interruption,
     Dead,

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   trigger,
   state,
@@ -8,7 +8,7 @@ import {
 } from '@angular/animations';
 import { TimerType } from '@app/shared/model/timer-type.model';
 import { TimerService } from '@app/core/timer-service/timer.service';
-import { map, Observable, Subscription, take, tap } from 'rxjs';
+import { Observable, take, tap } from 'rxjs';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { environment } from 'src/environments/environment';
 import { PomodoroTimerStrategy } from '@app/core/timer-service/timer-strategy/pomodoro-timer-strategy';
@@ -103,7 +103,7 @@ export class PomodoroComponent implements OnInit {
   onInterrupt() {
     this.timerState$?.pipe(take(1)).subscribe((state) => {
       switch (state) {
-        case TimerState.Work:
+        case TimerState.Focus:
         case TimerState.Break:
           this.timerService.requestInterruption();
           break;

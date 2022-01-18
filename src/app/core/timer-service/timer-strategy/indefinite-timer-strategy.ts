@@ -1,3 +1,4 @@
+import { getBreakTime } from '@app/shared';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerService } from '../timer.service';
 import { NextState, TimerStrategy } from './timer-strategy.interface';
@@ -10,22 +11,22 @@ export class IndefiniteTimerStrategy implements TimerStrategy {
   }
 
   breakPeriod(): number {
-    return this.timerService.getBreakTime(this.timerService.focusSessionDuration);
+    return getBreakTime(this.timerService.focusSessionDuration);
   }
 
   onStartTimer(timerService: TimerService): NextState {
-    return { state: TimerState.Work, stateDuration: this.focusPeriod() }
+    return { state: TimerState.Focus, stateDuration: this.focusPeriod() }
   }
 
   onStateSwitch(timerService: TimerService): NextState {
     switch (timerService.getTimer().state) {
-      case TimerState.Work:
+      case TimerState.Focus:
         return { state: TimerState.Dead, stateDuration: 0 }
       case TimerState.Interruption:
       case TimerState.Paused:
       case TimerState.Break:
         if (timerService.timeRemaining > 0) {
-          return { state: TimerState.Work, stateDuration: timerService.timeRemaining };
+          return { state: TimerState.Focus, stateDuration: timerService.timeRemaining };
         } else {
           return { state: TimerState.Dead, stateDuration: 0 };
         }
