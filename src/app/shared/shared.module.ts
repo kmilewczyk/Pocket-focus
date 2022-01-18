@@ -4,11 +4,11 @@ import { HoverClassDirective } from './hover-class/hover-class.directive';
 import { StretchTextareaDirective } from './stretch-textarea/stretch-textarea';
 import { PomodoroHeaderComponent } from './pomodoro-header/pomodoro-header.component';
 import { RouterModule } from '@angular/router';
-import { SlidableSelectComponent } from './slidable-select/slidable-select.component';
+import { WheelSelectComponent } from './wheel-select/wheel-select.component';
 
 @NgModule({
-  declarations: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, SlidableSelectComponent],
+  declarations: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, WheelSelectComponent],
   imports: [CommonModule, RouterModule],
-  exports: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, SlidableSelectComponent],
+  exports: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, WheelSelectComponent],
 })
 export class SharedModule {}

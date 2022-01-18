@@ -1,20 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SlidableSelectComponent } from './slidable-select.component';
+import { WheelSelectComponent } from './wheel-select.component';
 
-describe('SlidableSelectComponent', () => {
-  let component: SlidableSelectComponent;
-  let fixture: ComponentFixture<SlidableSelectComponent>;
+describe('WheelSelectComponent', () => {
+  let component: WheelSelectComponent;
+  let fixture: ComponentFixture<WheelSelectComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SlidableSelectComponent ]
+      declarations: [ WheelSelectComponent ]
     })
     .compileComponents();
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SlidableSelectComponent);
+    fixture = TestBed.createComponent(WheelSelectComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

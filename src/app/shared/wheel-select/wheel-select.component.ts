@@ -12,19 +12,19 @@ import {
   ViewChild,
 } from '@angular/core';
 import { Subscription, timer } from 'rxjs';
-import { componentTrigger, valueTrigger } from './slidable-select.animation';
+import { componentTrigger, valueTrigger } from './wheel-select.animation';
 import {
   ComponentAnimationState,
   ValueAnimationState,
-} from './slidable-select.model';
+} from './wheel-select.model';
 
 @Component({
-  selector: 'app-slidable-select',
-  templateUrl: './slidable-select.component.html',
-  styleUrls: ['./slidable-select.component.scss'],
+  selector: 'wheel-select',
+  templateUrl: './wheel-select.component.html',
+  styleUrls: ['./wheel-select.component.scss'],
   animations: [componentTrigger, valueTrigger],
 })
-export class SlidableSelectComponent
+export class WheelSelectComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
   readonly selectDelay = 300; // in ms

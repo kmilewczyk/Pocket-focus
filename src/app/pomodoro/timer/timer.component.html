@@ -5,8 +5,8 @@
             <button class="w-100 w-sm-25 btn btn-outline-light m-4" (click)="select.moveOneUp()">
                 <i class="bi bi-dash-circle display-5"></i>
             </button>
-            <app-slidable-select sliderClass="bg-dark" [componentWidth]="18" [labels]="valueOptionsLabels"
-                [(selectedIndex)]="selection" #select></app-slidable-select>
+            <wheel-select sliderClass="bg-dark" [componentWidth]="18" [labels]="valueOptionsLabels"
+                [(selectedIndex)]="selection" #select></wheel-select>
             <button class="w-100 w-sm-25 btn btn-outline-light m-4" (click)="select.moveOneDown()">
                 <i class="bi bi-plus-circle display-5"></i>
             </button>

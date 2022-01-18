@@ -11,7 +11,7 @@ import {
 import {
   ComponentAnimationState,
   ValueAnimationState,
-} from './slidable-select.model';
+} from './wheel-select.model';
 
 export const componentTrigger = trigger('componentTrigger', [
   state(

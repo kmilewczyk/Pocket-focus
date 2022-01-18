@@ -1,18 +1,13 @@
 import {
   Component,
   Input,
-  OnChanges,
   OnDestroy,
   OnInit,
-  Output,
-  SimpleChanges,
-  ViewChild,
 } from '@angular/core';
 import { TimerService } from '@app/core/timer-service/timer.service';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerType } from '@app/shared/model/timer-type.model';
-import { SlidableSelectComponent } from '@app/shared/slidable-select/slidable-select.component';
-import { interval, Observable, Subscription, take, timeout, timer } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 const pomodoroOptionLabels = [
   '30:00',
