@@ -1,0 +1,12 @@
+<!-- The break time hint -->
+<p *ngIf="(timerState$ | async) !== TimerState.Break" class="text-muted text-center">
+    <span style="font-size: calc(1rem + 1vw)" *ngIf="timeBreakMinutes$ | async; else timeBreakInfo;">
+        {{ timeBreakMinutes$ | async }} minute break
+    </span>
+    <ng-template #timeBreakInfo>
+        <span style="font-size: calc(1rem + 0.5vw)">
+            <p class="mb-0"> 1 minute break per 5 minutes of focus. </p>
+            <p class="mt-0"> 5 minutes minimum. </p>
+        </span>
+    </ng-template>
+</p>

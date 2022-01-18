@@ -1,4 +1,4 @@
-<div class="mb-4">
+<div>
     <div class="text-center">
         <div *ngIf="editMode; else normalView"
             class="d-flex align-items-center justify-content-center flex-wrap flex-sm-nowrap">
@@ -20,17 +20,6 @@
                     </span>
                 </h1>
             </div>
-            <p *ngIf="timerState !== TimerState.Break" class="text-muted">
-                <span style="font-size: calc(1rem + 1vw)" *ngIf="timeBreakMinutes; else timeBreakInfo;">
-                    {{ timeBreakMinutes }} minute break
-                </span>
-                <ng-template #timeBreakInfo>
-                    <span style="font-size: calc(1rem + 0.5vw)">
-                        <p class="mb-0"> 1 minute break per 5 minutes of focus. </p>
-                        <p class="mt-0"> 5 minutes minimum. </p>
-                    </span>
-                </ng-template>
-            </p>
         </ng-template>
     </div>
 </div>

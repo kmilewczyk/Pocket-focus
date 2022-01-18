@@ -1,5 +1,6 @@
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../shared.module';
 
 import { WheelSelectComponent } from './wheel-select.component';
@@ -12,7 +13,7 @@ describe('WheelSelectComponent', () => {
     const cdrSpy = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
 
     await TestBed.configureTestingModule({
-      imports: [SharedModule],
+      imports: [BrowserAnimationsModule],
       declarations: [WheelSelectComponent],
       providers: [{ provide: ChangeDetectorRef, useValue: cdrSpy }],
     }).compileComponents();

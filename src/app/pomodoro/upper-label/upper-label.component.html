@@ -1,0 +1,39 @@
+<div>
+    <!-- Upper label on edit -->
+    <div *ngIf="editMode; else contextUpperLabel" class="text-center">
+        <h3> Pick session duration </h3>
+        <p *ngIf="(timerType$ | async) !== TimerType.Indefinite; else indfBreakLabel"> breaks included </p>
+        <ng-template #indfBreakLabel>
+            <p> take a break only when you think you need one. </p>
+        </ng-template>
+    </div>
+
+    <!-- Upper label when not on edit -->
+    <ng-template #contextUpperLabel>
+        <!-- Label when running -->
+        <div *ngIf="(timerActive$ | async); else totalTimeLabel" class="text-center h1 display-1">
+            <h5 style="font-weight: normal; opacity: 0.8;">
+                {{ ((minutesRemaining$ | async | default:-1) > 1) ? (minutesRemaining$ | async) + " minutes remaining" : "less than a minute left" }}
+            </h5>
+            <div [ngSwitch]="(timerState$ | async)">
+                <span *ngSwitchCase="TimerState.Work"> Focus </span>
+                <span *ngSwitchCase="TimerState.Break"> Break </span>
+                <span *ngSwitchCase="TimerState.Interruption">
+                    <span> Interruption </span>
+                    <div class="h6 mt-1 text-muted"> Click "continue" to resume focus session after the timer runs out.
+                    </div>
+                </span>
+                <span *ngSwitchCase="TimerState.Paused"> Paused </span>
+            </div>
+        </div>
+
+        <!-- Label when not running -->
+        <ng-template #totalTimeLabel>
+            <div class="text-center">
+                <h3>Total time</h3>
+                <p>{{ totalTime$ | async }} minutes</p>
+            </div>
+        </ng-template>
+    </ng-template>
+
+</div>

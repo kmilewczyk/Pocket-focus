@@ -4,6 +4,7 @@ import { TimerType } from '@app/shared/model/timer-type.model';
 import {
   BehaviorSubject,
   interval,
+  map,
   Observable,
   Subject,
   Subscription,
@@ -34,10 +35,7 @@ export class TimerService implements OnDestroy {
   private pauseAfterInterruption = new BehaviorSubject<boolean>(false);
 
   // Total session time including the breaks, set by the user
-  private totalSessionTimeMinutes = new BehaviorSubject<number>(30);
-
-  // Session time left including the (possible) breaks
-  private sessionTimeLeft = new BehaviorSubject<number>(25);
+  private totalSessionTime = new BehaviorSubject<number>(30 * 60);
 
   // Subscription for interval function that counts down the timer
   private intervalSub?: Subscription;
@@ -66,7 +64,7 @@ export class TimerService implements OnDestroy {
   public get timeRemaining() {
     return Math.max(
       0,
-      this.totalSessionTimeMinutes.value * 60 - this.timeElapsed
+      this.totalSessionTime.value - this.timeElapsed
     );
   }
 
@@ -77,7 +75,7 @@ export class TimerService implements OnDestroy {
   }
 
   get totalSessionTime$() {
-    return this.totalSessionTimeMinutes.asObservable();
+    return this.totalSessionTime.asObservable();
   }
 
   public get timerType$(): Observable<TimerType> {
@@ -88,8 +86,12 @@ export class TimerService implements OnDestroy {
     return this.timer.asObservable();
   }
 
-  public get sessionTimeLeft$() {
-    return this.sessionTimeLeft.asObservable();
+  public get timerState$() {
+    return this.timer.pipe(map(timer => timer.state));
+  }
+
+  public get timeRemaining$() {
+    return this.timer.pipe(map(_ => this.timeRemaining));
   }
 
   public get pauseAfterInterruption$() {
@@ -101,23 +103,20 @@ export class TimerService implements OnDestroy {
   }
 
   public getTotalSessionTime() {
-    return this.totalSessionTimeMinutes.value;
+    return this.totalSessionTime.value;
   }
 
-  public setTotalSessionTime(timeInMinutes: number) {
+  public setTotalSessionTimeInMinutes(timeInMinutes: number) {
     if (timeInMinutes > 0) {
-      this.totalSessionTimeMinutes.next(timeInMinutes);
+      this.totalSessionTime.next(timeInMinutes * 60);
     } else {
       throw new Error('Time in minutes was nonpositive');
     }
   }
 
-  public setTimerType(timerType: TimerType) {
-    this.timerType.next(timerType);
-  }
-
-  public setTimerStrategy(strategy: TimerStrategy) {
+  public setTimerType(timerType: TimerType, strategy: TimerStrategy) {
     this.timerStrategy = strategy;
+    this.timerType.next(timerType);
   }
 
   public get focusPeriod(): number {

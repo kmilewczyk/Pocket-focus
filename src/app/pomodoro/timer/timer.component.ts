@@ -1,9 +1,4 @@
-import {
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { TimerService } from '@app/core/timer-service/timer.service';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerType } from '@app/shared/model/timer-type.model';
@@ -32,11 +27,11 @@ const hourOptionLabels = [
   '1:00:00',
   '2:00:00',
   '3:00:00',
-  '4:00:00', 
-  '5:00:00', 
-  '6:00:00', 
-  '7:00:00', 
-  '8:00:00', 
+  '4:00:00',
+  '5:00:00',
+  '6:00:00',
+  '7:00:00',
+  '8:00:00',
 ];
 
 @Component({
@@ -52,7 +47,6 @@ export class TimerComponent implements OnInit, OnDestroy {
   timer?: Subscription;
   timerTypeSub?: Subscription;
 
-  timerState?: TimerState;
   timerType?: TimerType;
 
   get selection() {
@@ -71,59 +65,35 @@ export class TimerComponent implements OnInit, OnDestroy {
   timeMinutes = 0;
   timeSeconds = 0;
 
-  timeBreakMinutes?: number;
-
   constructor(private timerService: TimerService) {}
 
   ngOnInit(): void {
-    this.timerTypeSub = this.timerService.timerType$.subscribe((timerType) => {
-      this.timerType = timerType;
-      this.onTimerTypeChange();
-    });
+    this.timerService.setTotalSessionTimeInMinutes(30);
 
-    this.timerService.setTotalSessionTime(30);
-
-    this.timer = this.timerService.timer$.subscribe((tickData) => {
-      this.timerState = tickData.state;
-      switch(this.timerState) {
-        case TimerState.Dead:
-          this.setTime(this.timerService.focusPeriod);
-          break;
-        case TimerState.Paused:
-          this.setTime(0);
-          break;
-        case TimerState.Break:
-        case TimerState.Interruption:
-        case TimerState.Work:
-          this.setTime(tickData.secondsLeft!);
-          break;
-        default:
-          throw new Error("Unhandled TimerState " + this.TimerState + " at timer.component");
-      }
-    });
+    this.timer = this.timerService.timer$.subscribe(this.onTimerTick.bind(this));
+    this.timerTypeSub = this.timerService.timerType$.subscribe(this.onTimerTypeChange.bind(this));
   }
 
   ngOnDestroy(): void {
-    this.timerTypeSub?.unsubscribe();
     this.timer?.unsubscribe();
+    this.timerTypeSub?.unsubscribe();
   }
 
-  onTimerTypeChange() {
+  onTimerTypeChange(timerType: TimerType) {
+    this.timerType = timerType;
+
     switch (this.timerType) {
       case TimerType.Pomodoro:
         this.valueOptionsLabels = pomodoroOptionLabels;
         this.selection = 0;
-        this.timeBreakMinutes = 5;
         break;
       case TimerType.Hour:
         this.valueOptionsLabels = hourOptionLabels;
         this.selection = 0;
-        this.timeBreakMinutes = 10;
         break;
       case TimerType.Indefinite:
         this.valueOptionsLabels = pomodoroOptionLabels;
         this.selection = 0;
-        this.timeBreakMinutes = undefined;
         break;
       default:
         throw new Error('Not implemented');
@@ -136,16 +106,38 @@ export class TimerComponent implements OnInit, OnDestroy {
     switch (this.timerType) {
       case TimerType.Indefinite:
       case TimerType.Pomodoro:
-        this.timerService.setTotalSessionTime(
+        this.timerService.setTotalSessionTimeInMinutes(
           (this.selection + 1) * 30
         );
         break;
       case TimerType.Hour:
-        this.timerService.setTotalSessionTime((this.selection + 1) * 60);
+        this.timerService.setTotalSessionTimeInMinutes(
+          (this.selection + 1) * 60
+        );
         break;
     }
 
     this.setTime(this.timerService.focusPeriod);
+  }
+
+  onTimerTick(tick: { state: TimerState, secondsLeft?: number }) {
+    switch (tick.state) {
+      case TimerState.Dead:
+        this.setTime(this.timerService.focusPeriod);
+        break;
+      case TimerState.Paused:
+        this.setTime(0);
+        break;
+      case TimerState.Break:
+      case TimerState.Interruption:
+      case TimerState.Work:
+        this.setTime(tick.secondsLeft!);
+        break;
+      default:
+        throw new Error(
+          'Unhandled TimerState ' + this.TimerState + ' at timer.component'
+        );
+    }
   }
 
   private setTime(seconds: number) {

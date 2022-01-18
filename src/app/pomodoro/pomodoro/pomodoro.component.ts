@@ -1,8 +1,4 @@
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   trigger,
   state,
@@ -12,7 +8,7 @@ import {
 } from '@angular/animations';
 import { TimerType } from '@app/shared/model/timer-type.model';
 import { TimerService } from '@app/core/timer-service/timer.service';
-import { map, Observable, Subscription, take } from 'rxjs';
+import { map, Observable, Subscription, take, tap } from 'rxjs';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { environment } from 'src/environments/environment';
 import { PomodoroTimerStrategy } from '@app/core/timer-service/timer-strategy/pomodoro-timer-strategy';
@@ -42,74 +38,38 @@ import { IndefiniteTimerStrategy } from '@app/core/timer-service/timer-strategy/
     ]),
   ],
 })
-export class PomodoroComponent implements OnInit, OnDestroy {
+export class PomodoroComponent implements OnInit {
   production = environment.production;
 
   TimerType = TimerType;
   TimerState = TimerState;
 
   timerType$?: Observable<TimerType>;
-
-  timerSub?: Subscription;
-
-  goalsVisible = false;
-
-  timerActivated = false;
-  
-  timerStateValue?: TimerState;
-  get timerState(): TimerState | undefined {
-    return this.timerStateValue
-  }
-  set timerState(value: TimerState | undefined) {
-    this.timerStateValue = value;
-    this.timerActivated = value !== TimerState.Dead;
-  }
-
-  editMode = false;
-
-  minutesRemaining = 0;
-
+  timerState$?: Observable<TimerState>;
   pauseAfterInterruption$?: Observable<boolean>;
 
-
-  get totalTime$() {
-    return this.timerService.totalSessionTime$.pipe(
-      map((totalMinutes) => {
-        const hours = Math.floor(totalMinutes / 60);
-        const leftMinutes = totalMinutes % 60;
-        const hourLabel =
-          hours > 0 ? hours + (hours > 1 ? ' hours' : ' hour') : '';
-        const minuteLabel =
-          leftMinutes > 0
-            ? leftMinutes + (leftMinutes > 1 ? ' minutes' : ' minute')
-            : '';
-
-        return hourLabel + ' ' + minuteLabel;
-      })
-    );
-  }
+  goalsVisible = false;
+  timerActivated = false;
+  editMode = false;
 
   constructor(public timerService: TimerService) {}
 
   ngOnInit(): void {
     this.timerType$ = this.timerService.timerType$;
+    this.timerState$ = this.timerService.timerState$.pipe(
+      tap(this.onTimerStateChange.bind(this))
+    );
     this.pauseAfterInterruption$ = this.timerService.pauseAfterInterruption$;
-
-    this.timerSub = this.timerService.timer$.subscribe(tick => {
-      this.timerState = tick.state;
-      this.updateTimeRemaining();
-    })
-  }
-
-  ngOnDestroy(): void {
-    this.timerSub?.unsubscribe();
   }
 
   onTimerTypeSwitch() {
     const switchValues = [
       { type: TimerType.Pomodoro, strategy: new PomodoroTimerStrategy() },
       { type: TimerType.Hour, strategy: new HourTimerStrategy() },
-      { type: TimerType.Indefinite, strategy: new IndefiniteTimerStrategy(this.timerService) }
+      {
+        type: TimerType.Indefinite,
+        strategy: new IndefiniteTimerStrategy(this.timerService),
+      },
     ];
 
     this.timerType$?.pipe(take(1)).subscribe((timerType) => {
@@ -120,8 +80,7 @@ export class PomodoroComponent implements OnInit, OnDestroy {
             switchValues.length
         ];
 
-      this.timerService.setTimerType(newValue.type);
-      this.timerService.setTimerStrategy(newValue.strategy);
+      this.timerService.setTimerType(newValue.type, newValue.strategy);
     });
   }
 
@@ -142,34 +101,39 @@ export class PomodoroComponent implements OnInit, OnDestroy {
   }
 
   onInterrupt() {
-    switch(this.timerState) {
-      case TimerState.Work:
-      case TimerState.Break:
-        this.timerService.requestInterruption();
-        break
-      case TimerState.Interruption:
-        this.timerService.pauseAfterInterruption$.pipe(take(1)).subscribe(shouldPause => {
-          if (shouldPause) {
-            this.timerService.removePauseAfterInterruption();
-          } else {
-            this.timerService.addPauseAfterInterruption();
-          }
-        });
-        break;
-      case TimerState.Paused:
-        this.timerService.resumeTimer();
-        break;
-      default:
-        throw new Error("Unhandled state onInterrupt " + this.timerState);
-    }
+    this.timerState$?.pipe(take(1)).subscribe((state) => {
+      switch (state) {
+        case TimerState.Work:
+        case TimerState.Break:
+          this.timerService.requestInterruption();
+          break;
+        case TimerState.Interruption:
+          this.timerService.pauseAfterInterruption$
+            .pipe(take(1))
+            .subscribe((shouldPause) => {
+              if (shouldPause) {
+                this.timerService.removePauseAfterInterruption();
+              } else {
+                this.timerService.addPauseAfterInterruption();
+              }
+            });
+          break;
+        case TimerState.Paused:
+          this.timerService.resumeTimer();
+          break;
+        default:
+          throw new Error('Unhandled state onInterrupt ' + state);
+      }
+    });
   }
 
-  onDebug() {
-    if (!environment.production)
-      this.timerService.DEBUG_almostSwitch!();
+  onTimerStateChange(state: TimerState) {
+    this.timerActivated = state !== TimerState.Dead;
   }
 
-  private updateTimeRemaining() {
-    this.minutesRemaining = Math.ceil(this.timerService.timeRemaining / 60);
-  }
+  onDebug = environment.production
+    ? () => {}
+    : () => {
+        this.timerService.DEBUG_almostSwitch!();
+      };
 }
