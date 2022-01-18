@@ -105,25 +105,19 @@ export class TimerService implements OnDestroy {
   }
 
   public setTotalSessionTime(timeInMinutes: number) {
-    this.totalSessionTimeMinutes.next(timeInMinutes);
+    if (timeInMinutes > 0) {
+      this.totalSessionTimeMinutes.next(timeInMinutes);
+    } else {
+      throw new Error('Time in minutes was nonpositive');
+    }
   }
 
   public setTimerType(timerType: TimerType) {
-    switch (timerType) {
-      case TimerType.Pomodoro:
-        this.timerStrategy = new PomodoroTimerStrategy();
-        break;
-      case TimerType.Hour:
-        this.timerStrategy = new HourTimerStrategy();
-        break;
-      case TimerType.Indefinite:
-        this.timerStrategy = new IndefiniteTimerStrategy(this);
-        break;
-      default:
-        throw new Error('Not implemented');
-    }
-
     this.timerType.next(timerType);
+  }
+
+  public setTimerStrategy(strategy: TimerStrategy) {
+    this.timerStrategy = strategy;
   }
 
   public get focusPeriod(): number {

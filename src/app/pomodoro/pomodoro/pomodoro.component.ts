@@ -15,6 +15,9 @@ import { TimerService } from '@app/core/timer-service/timer.service';
 import { map, Observable, Subscription, take } from 'rxjs';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { environment } from 'src/environments/environment';
+import { PomodoroTimerStrategy } from '@app/core/timer-service/timer-strategy/pomodoro-timer-strategy';
+import { HourTimerStrategy } from '@app/core/timer-service/timer-strategy/hour-timer-strategy';
+import { IndefiniteTimerStrategy } from '@app/core/timer-service/timer-strategy/indefinite-timer-strategy';
 
 @Component({
   selector: 'app-pomodoro',
@@ -104,19 +107,21 @@ export class PomodoroComponent implements OnInit, OnDestroy {
 
   onTimerTypeSwitch() {
     const switchValues = [
-      TimerType.Pomodoro,
-      TimerType.Hour,
-      TimerType.Indefinite,
+      { type: TimerType.Pomodoro, strategy: new PomodoroTimerStrategy() },
+      { type: TimerType.Hour, strategy: new HourTimerStrategy() },
+      { type: TimerType.Indefinite, strategy: new IndefiniteTimerStrategy(this.timerService) }
     ];
 
     this.timerType$?.pipe(take(1)).subscribe((timerType) => {
       // Switch to the next in the array; wrap when at the last
-      const newType =
+      const newValue =
         switchValues[
-          (switchValues.indexOf(timerType) + 1) % switchValues.length
+          (switchValues.findIndex((elem) => elem.type == timerType) + 1) %
+            switchValues.length
         ];
 
-      this.timerService.setTimerType(newType);
+      this.timerService.setTimerType(newValue.type);
+      this.timerService.setTimerStrategy(newValue.strategy);
     });
   }
 
