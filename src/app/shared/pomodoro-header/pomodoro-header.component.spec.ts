@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { UserPreferencesService } from '@app/core';
+import { SharedModule } from '../shared.module';
 
 import { PomodoroHeaderComponent } from './pomodoro-header.component';
 
@@ -8,7 +12,11 @@ describe('PomodoroHeaderComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ PomodoroHeaderComponent ]
+      declarations: [ PomodoroHeaderComponent ],
+      imports: [ SharedModule, RouterTestingModule.withRoutes([]) ],
+      providers: [
+        { provide: UserPreferencesService, use: jasmine.createSpyObj('UserPreferencesService', ['getObs']) },
+      ]
     })
     .compileComponents();
   });

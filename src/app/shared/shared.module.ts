@@ -5,10 +5,11 @@ import { StretchTextareaDirective } from './stretch-textarea/stretch-textarea';
 import { PomodoroHeaderComponent } from './pomodoro-header/pomodoro-header.component';
 import { RouterModule } from '@angular/router';
 import { WheelSelectComponent } from './wheel-select/wheel-select.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, WheelSelectComponent],
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BrowserAnimationsModule],
   exports: [HoverClassDirective, StretchTextareaDirective, PomodoroHeaderComponent, WheelSelectComponent],
 })
 export class SharedModule {}
