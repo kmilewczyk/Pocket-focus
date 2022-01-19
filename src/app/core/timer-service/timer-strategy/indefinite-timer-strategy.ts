@@ -7,11 +7,11 @@ export class IndefiniteTimerStrategy implements TimerStrategy {
   constructor(private timerService: TimerService) {}
 
   focusPeriod(): number {
-    return this.timerService.getTotalSessionTime() * 60;
+    return this.timerService.getTotalSessionTime()
   }
 
   breakPeriod(): number {
-    return getBreakTime(this.timerService.focusSessionDuration);
+    return getBreakTime(this.timerService.periodSecondsElapsed);
   }
 
   onStartTimer(timerService: TimerService): NextState {

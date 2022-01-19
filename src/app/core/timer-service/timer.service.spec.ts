@@ -1,4 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { TimerType } from '@app/shared/model/timer-type.model';
+import { take } from 'rxjs';
+import { PomodoroTimerStrategy } from './timer-strategy/pomodoro-timer-strategy';
 
 import { TimerService } from './timer.service';
 
@@ -14,9 +17,30 @@ describe('TimerService', () => {
     expect(service).toBeTruthy();
   });
 
-  // Should return total session time after set
+  it('Should return total session time after set', () => {
+    const timeSet = 50;
+    service.setTotalSessionTimeInMinutes(timeSet);
+    expect(service.getTotalSessionTime()/60).toEqual(timeSet);
+    service.totalSessionTime$.pipe(take(1)).subscribe((totalTime) => {
+      expect(totalTime/60).toEqual(timeSet);
+    });
+  });
 
-  // should fails on negative total session time set
+  it('should fail on setting total session time to negative number', () => {
+    expect(() => { service.setTotalSessionTimeInMinutes(-12); }).toThrow();
+  });
+
+  it('should fail on setting total session time to zero', () => {
+    expect(() => { service.setTotalSessionTimeInMinutes(0); }).toThrow();
+  });
+
+  it('should return after stop a time remaining equal to total session time', () => {
+    service.setTotalSessionTimeInMinutes(43);
+    service.setTimerType(TimerType.Pomodoro, new PomodoroTimerStrategy());
+    service.startTimer();
+    service.stopTimer();
+    expect(service.timeRemaining/60).toEqual(43);
+  });
 
   // should return set timerType
 
@@ -25,10 +49,6 @@ describe('TimerService', () => {
   // should use the strategy's break period
 
   // should emit timer tick with focus type on the start
-
-  // should be the same as before the start on stopTimer()
-
-  // should be the same as before the start on timer finish
 
   // should go to a break after a focus period
 

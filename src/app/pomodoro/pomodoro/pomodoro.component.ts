@@ -14,6 +14,7 @@ import { environment } from 'src/environments/environment';
 import { PomodoroTimerStrategy } from '@app/core/timer-service/timer-strategy/pomodoro-timer-strategy';
 import { HourTimerStrategy } from '@app/core/timer-service/timer-strategy/hour-timer-strategy';
 import { IndefiniteTimerStrategy } from '@app/core/timer-service/timer-strategy/indefinite-timer-strategy';
+import { TimeKeeper } from '@app/core/timer-service/time-keeper/time-keeper';
 
 @Component({
   selector: 'app-pomodoro',
@@ -52,7 +53,7 @@ export class PomodoroComponent implements OnInit {
   timerActivated = false;
   editMode = false;
 
-  constructor(public timerService: TimerService) {}
+  constructor(public timerService: TimerService, private timeKeeper: TimeKeeper) {}
 
   ngOnInit(): void {
     this.timerType$ = this.timerService.timerType$;
@@ -134,6 +135,6 @@ export class PomodoroComponent implements OnInit {
   onDebug = environment.production
     ? () => {}
     : () => {
-        this.timerService.DEBUG_almostSwitch!();
+        this.timeKeeper.forward(25 * 60);
       };
 }

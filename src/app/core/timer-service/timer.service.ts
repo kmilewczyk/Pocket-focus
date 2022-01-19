@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { getBreakTime } from '@app/shared';
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerType } from '@app/shared/model/timer-type.model';
@@ -9,8 +9,11 @@ import {
   Observable,
   Subject,
   Subscription,
+  take,
+  takeUntil,
 } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { TimeKeeper } from './time-keeper/time-keeper';
 import { HourTimerStrategy } from './timer-strategy/hour-timer-strategy';
 import { IndefiniteTimerStrategy } from './timer-strategy/indefinite-timer-strategy';
 import { PomodoroTimerStrategy } from './timer-strategy/pomodoro-timer-strategy';
@@ -19,10 +22,11 @@ import {
   TimerStrategy,
 } from './timer-strategy/timer-strategy.interface';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root'})
 export class TimerService implements OnDestroy {
+  // Period -> time slot with a state associated with it, like focus or break
+  // Session -> time span of the entire countdown
+
   // Observable for the timer's type
   private timerType = new BehaviorSubject<TimerType>(TimerType.Pomodoro);
 
@@ -38,35 +42,53 @@ export class TimerService implements OnDestroy {
   // Total session time including the breaks, set by the user
   private totalSessionTime = new BehaviorSubject<number>(30 * 60);
 
-  // Subscription for interval function that counts down the timer
-  private intervalSub?: Subscription;
-
   // Strategy for TimerType behaviour
   private timerStrategy: TimerStrategy = new PomodoroTimerStrategy();
 
   // Total time elapsed in
   private timeElapsed = 0;
 
+  private timeElapsedBase = 0;
+
+  private periodLength = 0;
+
+  // Prevents switching on timer end
+  private preventSwitchingOnTimerEnd = false;
+
+  // Emits ngDestory event
+  ngDestroy$ = new Subject();
+
   // Time elapsed during the focus session
-  private focusSessionDurationValue = 0;
-  public get focusSessionDuration() {
-    return this.focusSessionDurationValue;
+  private periodSecondsElapsedValue = 0;
+  public get periodSecondsElapsed() {
+    return this.periodSecondsElapsedValue;
   }
-  protected set focusSessionDuration(value: number) {
-    this.focusSessionDurationValue = value;
-  }
-
-  public get timeRemaining() {
-    return Math.max(
-      0,
-      this.totalSessionTime.value - this.timeElapsed
-    );
+  protected set periodSecondsElapsed(value: number) {
+    this.periodSecondsElapsedValue = value;
   }
 
-  constructor() {}
+  constructor(private timeKeeper: TimeKeeper) {
+    this.timeKeeper.tick$
+      .pipe(takeUntil(this.ngDestroy$))
+      .subscribe(this.onTimerTick.bind(this));
+
+    this.timeKeeper.end$
+      .pipe(takeUntil(this.ngDestroy$))
+      .subscribe(this.onTimerEnd.bind(this));
+
+    this.ngDestroy$.pipe(take(1)).subscribe((_) => {
+      this.timeKeeper.stop();
+    });
+  }
 
   ngOnDestroy(): void {
-    this.intervalSub?.unsubscribe();
+    this.ngDestroy$.next(null);
+    this.ngDestroy$.complete();
+  }
+
+  // In seconds
+  public get timeRemaining() {
+    return Math.max(0, this.totalSessionTime.value - this.timeElapsed);
   }
 
   get totalSessionTime$() {
@@ -82,11 +104,11 @@ export class TimerService implements OnDestroy {
   }
 
   public get timerState$() {
-    return this.timer.pipe(map(timer => timer.state));
+    return this.timer.pipe(map((timer) => timer.state));
   }
 
   public get timeRemaining$() {
-    return this.timer.pipe(map(_ => this.timeRemaining));
+    return this.timer.pipe(map((_) => this.timeRemaining));
   }
 
   public get pauseAfterInterruption$() {
@@ -129,14 +151,13 @@ export class TimerService implements OnDestroy {
   }
 
   public stopTimer() {
-    this.intervalSub?.unsubscribe();
-    this.timer.next({ state: TimerState.Dead });
+    this.switchState({ state: TimerState.Dead, stateDuration: 0 });
   }
 
   public requestBreak() {
     this.switchState({
       state: TimerState.Break,
-      stateDuration: getBreakTime(this.focusSessionDuration),
+      stateDuration: getBreakTime(this.periodSecondsElapsed),
     });
   }
 
@@ -147,7 +168,7 @@ export class TimerService implements OnDestroy {
       case TimerState.Focus:
         this.switchState({
           state: TimerState.Interruption,
-          stateDuration: getBreakTime(this.focusSessionDuration),
+          stateDuration: getBreakTime(this.periodSecondsElapsed),
         });
         break;
       case TimerState.Break:
@@ -182,12 +203,20 @@ export class TimerService implements OnDestroy {
   }
 
   private switchState(data: NextState) {
-    this.intervalSub?.unsubscribe();
-    this.focusSessionDuration = 0;
+    this.stopTimerWithoutSwitching();
 
-    if (data.state === TimerState.Dead || data.state === TimerState.Paused) {
+    this.periodSecondsElapsed = 0;
+
+    this.periodLength = data.stateDuration;
+
+    if (data.state === TimerState.Dead) {
+      this.reset()
+
       this.timer.next({ state: data.state });
       return;
+    } else if (data.state === TimerState.Paused) {
+      this.timer.next({ state: data.state })
+      return
     }
 
     this.timer.next({
@@ -195,40 +224,56 @@ export class TimerService implements OnDestroy {
       state: data.state,
     });
 
-    this.intervalSub = interval(1000).subscribe((_) => {
-      const secondsLeft = this.timer.value.secondsLeft! - 1;
-      const currentState = this.timer.value.state;
-      this.timeElapsed += 1;
-
-      if (currentState === TimerState.Focus) {
-        this.focusSessionDuration += 1;
-      }
-
-      if (secondsLeft > 0) {
-        // Timer continues normally
-        this.timer.next({ secondsLeft: secondsLeft, state: data.state });
-      } else {
-        // Timer finished a state.
-        if (
-          currentState === TimerState.Interruption &&
-          this.pauseAfterInterruption.value
-        ) {
-          this.switchState({ state: TimerState.Paused, stateDuration: 0 });
-        } else {
-          // Normal switch should occur
-          this.switchState(this.timerStrategy.onStateSwitch(this));
-        }
-      }
-    });
+    this.timeKeeper.start(data.stateDuration);
   }
 
-  public DEBUG_almostSwitch = environment.production
-    ? undefined
-    : () => {
-        const state = this.timer.value.state;
-        this.timeElapsed += this.timer.value.secondsLeft! - 3;
-        this.focusSessionDuration += this.timer.value.secondsLeft! - 3;
+  private onTimerTick(secondsElapsed: number) {
+    const secondsLeft = this.periodLength - secondsElapsed;
+    const currentState = this.timer.value.state;
+    
+    this.updateElapsedTime(secondsElapsed);
 
-        this.timer.next({ secondsLeft: 3, state: state });
-      };
+    this.timer.next({ secondsLeft: secondsLeft, state: currentState });
+  }
+
+  private onTimerEnd(secondsElapsed: number) {
+    const currentState = this.timer.value.state;
+
+    this.updateElapsedTime(secondsElapsed);
+
+    this.timeElapsedBase = this.timeElapsed;
+
+    if (this.preventSwitchingOnTimerEnd) {
+      return;
+    }
+
+    if (
+      currentState === TimerState.Interruption &&
+      this.pauseAfterInterruption.value
+    ) {
+      // Pause when interruption ends
+      this.switchState({ state: TimerState.Paused, stateDuration: 0 });
+    } else {
+      // Normal state switch
+      this.switchState(this.timerStrategy.onStateSwitch(this));
+    }
+  }
+
+  private updateElapsedTime(secondsElapsed: number) {
+    this.periodSecondsElapsed = secondsElapsed;
+    this.timeElapsed = this.timeElapsedBase + this.periodSecondsElapsed;
+  }
+
+  private stopTimerWithoutSwitching(){
+    this.preventSwitchingOnTimerEnd = true;
+    this.timeKeeper.stop();
+    this.preventSwitchingOnTimerEnd = false;
+  }
+
+  private reset() {
+    this.timeElapsed = 0;
+    this.timeElapsedBase = 0;
+    this.periodLength = 0;
+    this.periodSecondsElapsed = 0;
+  }
 }
