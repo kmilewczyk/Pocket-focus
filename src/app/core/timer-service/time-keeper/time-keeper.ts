@@ -14,6 +14,7 @@ export class TimeKeeper implements OnDestroy {
 
   private timeElapsedBase = 0;
   private timeElapsed = 0;
+  private endTime = 0;
   private end = new Subject<number>();
 
   private tick = new Subject<number>();
@@ -43,14 +44,11 @@ export class TimeKeeper implements OnDestroy {
       throw new Error('TimeKeeper received nonpositive value: ' + end);
     }
 
+    this.endTime = end;
+
     this.intervalSub = interval(1000).subscribe((offset) => {
       this.timeElapsed = this.timeElapsedBase + offset + 1;
-
-      this.tick.next(this.timeElapsed);
-
-      if (this.timeElapsed >= end) {
-        this.stop();
-      }
+      this.doTick();
     });
   }
 
@@ -64,6 +62,7 @@ export class TimeKeeper implements OnDestroy {
 
       this.timeElapsedBase = 0;
       this.timeElapsed = 0;
+      this.endTime = 0;
     }
   }
 
@@ -75,7 +74,9 @@ export class TimeKeeper implements OnDestroy {
     }
 
     if (this.intervalSub) {
+      this.timeElapsed += seconds;
       this.timeElapsedBase += seconds;
+      this.doTick();
     }
   }
 
@@ -87,7 +88,21 @@ export class TimeKeeper implements OnDestroy {
     }
 
     if (this.intervalSub) {
+      this.timeElapsed += seconds;
       this.timeElapsedBase = Math.max(0, this.timeElapsedBase - seconds);
+      this.doTick();
+    }
+  }
+
+  public isActive() {
+    return this.intervalSub !== undefined;
+  }
+
+  private doTick() {
+    this.tick.next(this.timeElapsed);
+
+    if (this.timeElapsed >= this.endTime) {
+      this.stop();
     }
   }
 }

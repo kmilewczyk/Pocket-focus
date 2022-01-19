@@ -145,7 +145,7 @@ export class TimerService implements OnDestroy {
   }
 
   public startTimer() {
-    this.timeElapsed = 0;
+    this.reset();
 
     this.switchState(this.timerStrategy.onStartTimer(this));
   }
