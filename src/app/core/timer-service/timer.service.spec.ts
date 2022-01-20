@@ -239,9 +239,53 @@ describe('TimerService', () => {
     timeKeeper.stop();
     expectState(TimerState.Paused);
 
-    service.stopTimer();
+    service.resumeTimer();
+    expectState(TimerState.Focus);
 
+    service.stopTimer();
   });
 
-  // should retain remaining break time when intrrupting
+  it('should retain remaining break time when intrrupting', () => {
+    const strategy = new PomodoroTimerStrategy();
+    service.setTotalSessionTimeInMinutes(30);
+    service.setTimerType(TimerType.Pomodoro, strategy);
+
+    const breakTime = strategy.breakPeriod();
+    const skipTime = 200;
+
+    service.startTimer();
+    service.requestBreak();
+    expectState(TimerState.Break);
+    timeKeeper.forward(skipTime);
+    expectState(TimerState.Break);
+
+    service.requestInterruption();
+    expectState(TimerState.Interruption);
+
+    service.timer$.pipe(take(1)).subscribe(tick => {
+      expect(tick.secondsLeft).toBeLessThanOrEqual(breakTime-skipTime);
+    });
+
+    service.stopTimer();
+  });
+
+  it('should return correct time remaining after a break', () => {
+    const strategy = new PomodoroTimerStrategy();
+    const totalTime = 60;
+    const expectedTime = totalTime * 60 - strategy.focusPeriod() - strategy.breakPeriod();
+    const possibleTimeLapsed = 100;
+    service.setTotalSessionTimeInMinutes(totalTime);
+
+    service.startTimer();
+    timeKeeper.forward(strategy.focusPeriod());
+    expectState(TimerState.Break);
+
+    timeKeeper.forward(strategy.breakPeriod());
+    expectState(TimerState.Focus);
+    
+    service.timeRemaining$.pipe(take(1)).subscribe(timeRemaining => {
+      expect(timeRemaining).toBeLessThanOrEqual(expectedTime);
+      expect(timeRemaining).toBeGreaterThanOrEqual(expectedTime - possibleTimeLapsed);
+    });
+  });
 });
