@@ -12,7 +12,11 @@ export class DebugTimerComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  onDebug() {
+  onTimeSkip() {
     this.timeKeeper.forward(25 * 60);
+  }
+
+  onTimerKill() {
+    this.timeKeeper.stop();
   }
 }

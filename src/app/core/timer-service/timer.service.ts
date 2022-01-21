@@ -37,7 +37,7 @@ export class TimerService implements OnDestroy {
   }>({ state: TimerState.Dead });
 
   // Observable for listening on whether timer should be paused after an interruption
-  private pauseAfterInterruption = new BehaviorSubject<boolean>(false);
+  private pauseAfterInterruptionSubject = new BehaviorSubject<boolean>(false);
 
   // Total session time including the breaks, set by the user
   private totalSessionTime = new BehaviorSubject<number>(30 * 60);
@@ -112,7 +112,11 @@ export class TimerService implements OnDestroy {
   }
 
   public get pauseAfterInterruption$() {
-    return this.pauseAfterInterruption.asObservable();
+    return this.pauseAfterInterruptionSubject.asObservable();
+  }
+
+  public get pauseAfterInterruption(): boolean {
+    return this.pauseAfterInterruptionSubject.value;
   }
 
   public getTimer() {
@@ -151,60 +155,36 @@ export class TimerService implements OnDestroy {
   }
 
   public stopTimer() {
-    this.switchState({ state: TimerState.Dead, stateDuration: 0 });
+    this.switchState(this.timerStrategy.onStopTimer(this));
   }
 
   public requestBreak() {
-    this.switchState({
-      state: TimerState.Break,
-      stateDuration: getBreakTime(this.periodSecondsElapsed),
-    });
+    this.switchState(this.timerStrategy.onRequestBreak(this));
   }
 
   public requestInterruption() {
-    const currentTimer = this.timer.value;
-
-    switch (currentTimer.state) {
-      case TimerState.Focus:
-        this.switchState({
-          state: TimerState.Interruption,
-          stateDuration: getBreakTime(this.periodSecondsElapsed),
-        });
-        break;
-      case TimerState.Break:
-        this.switchState({
-          state: TimerState.Interruption,
-          stateDuration: currentTimer.secondsLeft!,
-        });
-        break;
-      default:
-        throw new Error(
-          'Switched to interrupution from unhandled state: ' +
-            currentTimer.state
-        );
-    }
-
-    this.pauseAfterInterruption.next(true);
+    this.pauseAfterInterruptionSubject.next(true);
+    this.switchState(this.timerStrategy.onRequestInterruption(this));
   }
 
   public resumeTimer() {
-    if (this.timer.value.state === TimerState.Paused) {
-      this.switchState(this.timerStrategy.onStateSwitch(this));
+    const nextState = this.timerStrategy.onResumeTimer(this);
+    if (nextState.state !== TimerState.Paused) {
+      this.switchState(nextState);
       this.removePauseAfterInterruption();
     }
   }
 
   public removePauseAfterInterruption() {
-    this.pauseAfterInterruption.next(false);
+    this.pauseAfterInterruptionSubject.next(false);
   }
 
   public addPauseAfterInterruption() {
-    this.pauseAfterInterruption.next(true);
+    this.pauseAfterInterruptionSubject.next(true);
   }
 
   private switchState(data: NextState) {
     this.stopTimerWithoutSwitching();
-
     this.periodSecondsElapsed = 0;
 
     this.periodLength = data.stateDuration;
@@ -237,9 +217,8 @@ export class TimerService implements OnDestroy {
   }
 
   private onTimerEnd(secondsElapsed: number) {
-    const currentState = this.timer.value.state;
-
     this.updateElapsedTime(secondsElapsed);
+    console.log("timerend")
 
     this.timeElapsedBase = this.timeElapsed;
 
@@ -247,16 +226,9 @@ export class TimerService implements OnDestroy {
       return;
     }
 
-    if (
-      currentState === TimerState.Interruption &&
-      this.pauseAfterInterruption.value
-    ) {
-      // Pause when interruption ends
-      this.switchState({ state: TimerState.Paused, stateDuration: 0 });
-    } else {
-      // Normal state switch
-      this.switchState(this.timerStrategy.onStateSwitch(this));
-    }
+    console.log('timeswitch')
+
+    this.switchState(this.timerStrategy.onPeriodEnd(this));
   }
 
   private updateElapsedTime(secondsElapsed: number) {

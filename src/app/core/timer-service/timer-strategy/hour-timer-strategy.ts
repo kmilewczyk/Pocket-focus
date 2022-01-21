@@ -1,38 +1,14 @@
 import { TimerState } from '@app/shared/model/timer-state.model';
 import { TimerService } from '../timer.service';
+import { TimerStrategyBase } from './timer-strategy-base';
 import { NextState, TimerStrategy } from './timer-strategy.interface';
 
-export class HourTimerStrategy implements TimerStrategy {
-  focusPeriod(): number {
+export class HourTimerStrategy extends TimerStrategyBase {
+  override focusPeriod(): number {
     return 50 * 60;
   }
-  breakPeriod(): number {
-    return 10 * 60;
-  }
-  onStartTimer(timerService: TimerService): NextState {
-    return { state: TimerState.Focus, stateDuration: this.focusPeriod() };
-  }
-  onStateSwitch(timerService: TimerService): NextState {
-    switch (timerService.getTimer().state) {
-      case TimerState.Focus:
-        return { state: TimerState.Break, stateDuration: this.breakPeriod() };
-      case TimerState.Paused:
-      case TimerState.Interruption:
-      case TimerState.Break:
-        const focusTime = Math.min(
-          timerService.timeRemaining,
-          this.focusPeriod()
-        );
 
-        if (timerService.timeRemaining > 0) {
-          return { state: TimerState.Focus, stateDuration: focusTime };
-        } else {
-          return { state: TimerState.Dead, stateDuration: 0 };
-        }
-      default:
-        throw new Error(
-          'Argument Invalid for onstateSwitch: ' + timerService.getTimer().state
-        );
-    }
+  override breakPeriod(): number {
+    return 10 * 60;
   }
 }

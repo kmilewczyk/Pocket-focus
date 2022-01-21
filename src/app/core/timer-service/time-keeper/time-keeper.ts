@@ -35,7 +35,7 @@ export class TimeKeeper implements OnDestroy {
   // In seconds or date
   public start(end: number | Date) {
     this.stop();
-
+      
     if (end instanceof Date) {
       end = Math.floor((end.getTime() - Date.now()) / 1000);
     }
@@ -55,14 +55,16 @@ export class TimeKeeper implements OnDestroy {
   // Stops if the timer is running. Doesn't do anything else otherwise.
   public stop() {
     if (this.intervalSub) {
+      const timeElapsed = this.timeElapsed;
+
       this.intervalSub.unsubscribe();
       this.intervalSub = undefined;
-
-      this.end.next(this.timeElapsed);
 
       this.timeElapsedBase = 0;
       this.timeElapsed = 0;
       this.endTime = 0;
+
+      this.end.next(timeElapsed);
     }
   }
 

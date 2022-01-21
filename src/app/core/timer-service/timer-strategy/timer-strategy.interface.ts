@@ -7,10 +7,13 @@ export type NextState = {
 }
 
 export interface TimerStrategy {
-    onStartTimer(timerService: TimerService): NextState;
-    // onRequestBreak();
-    // onRequestInterruption
-    onStateSwitch(timerService: TimerService): NextState;
     focusPeriod(): number;
     breakPeriod(): number;
+
+    onStartTimer(timerService: TimerService): NextState;
+    onPeriodEnd(timerService: TimerService): NextState;
+    onRequestBreak(timerService: TimerService): NextState;
+    onRequestInterruption(timerService: TimerService): NextState;
+    onResumeTimer(timerService: TimerService): NextState;
+    onStopTimer(timerService: TimerService): NextState;
 }
