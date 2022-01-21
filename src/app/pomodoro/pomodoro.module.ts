@@ -9,9 +9,10 @@ import { ProductivityComponent } from './productivity/productivity.component';
 import { FormsModule } from '@angular/forms';
 import { UpperLabelComponent } from './upper-label/upper-label.component';
 import { BreakTimeHintComponent } from './break-time-hint/break-time-hint.component';
+import { DebugTimerComponent } from './debug-timer/debug-timer.component';
 
 @NgModule({
-  declarations: [PomodoroComponent, TimerComponent, ProductivityComponent, UpperLabelComponent, BreakTimeHintComponent],
+  declarations: [PomodoroComponent, TimerComponent, ProductivityComponent, UpperLabelComponent, BreakTimeHintComponent, DebugTimerComponent],
   imports: [CommonModule, PomodoroRoutingModule, SharedModule, FormsModule],
 })
 export class PomodoroModule {}

@@ -117,10 +117,4 @@ export class PomodoroComponent implements OnInit {
   onTimerStateChange(state: TimerState) {
     this.timerActivated = state !== TimerState.Dead;
   }
-
-  onDebug = environment.production
-    ? () => {}
-    : () => {
-        this.timeKeeper.forward(25 * 60);
-      };
 }
