@@ -1,7 +1,7 @@
 import { Directive, ElementRef, HostListener } from '@angular/core';
 
 @Directive({
-  selector: '[appStretch]',
+  selector: '[app-stretch]',
 })
 export class StretchTextareaDirective {
   constructor(public elementRef: ElementRef) {}

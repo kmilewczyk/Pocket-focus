@@ -15,28 +15,14 @@ import { PomodoroTimerStrategy } from '@app/core/timer-service/timer-strategy/po
 import { HourTimerStrategy } from '@app/core/timer-service/timer-strategy/hour-timer-strategy';
 import { IndefiniteTimerStrategy } from '@app/core/timer-service/timer-strategy/indefinite-timer-strategy';
 import { TimeKeeper } from '@app/core/timer-service/time-keeper/time-keeper';
+import { triggerOnProductivityVisible } from './pomodoro.animations';
 
 @Component({
   selector: 'app-pomodoro',
   templateUrl: './pomodoro.component.html',
   styleUrls: ['./pomodoro.component.scss'],
   animations: [
-    trigger('productivityVisible', [
-      state(
-        'in',
-        style({
-          opacity: 1,
-        })
-      ),
-      transition('void => *', [
-        style({
-          opacity: 0,
-          height: 0,
-          transform: 'translateY(-10rem)',
-        }),
-        animate('0.5s'),
-      ]),
-    ]),
+    triggerOnProductivityVisible
   ],
 })
 export class PomodoroComponent implements OnInit {

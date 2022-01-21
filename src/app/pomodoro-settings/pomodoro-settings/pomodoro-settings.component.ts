@@ -11,5 +11,4 @@ export class PomodoroSettingsComponent implements OnInit {
 
   ngOnInit(): void {
   }
-
 }
