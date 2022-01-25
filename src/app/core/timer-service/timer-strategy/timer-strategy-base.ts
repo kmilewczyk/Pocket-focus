@@ -27,7 +27,7 @@ export class TimerStrategyBase implements TimerStrategy {
     const currentState = timerService.getTimer().state;
     switch (currentState) {
       case TimerState.Focus:
-        return { state: TimerState.Break, stateDuration: this.breakPeriod() };
+        return this.nextBreakOrTimerEnd(timerService);
 
       case TimerState.Interruption:
         if (timerService.pauseAfterInterruption) {
@@ -110,6 +110,16 @@ export class TimerStrategyBase implements TimerStrategy {
 
     if (timerService.timeRemaining > 0) {
       return { state: TimerState.Focus, stateDuration: focusTime };
+    } else {
+      return { state: TimerState.Dead, stateDuration: 0 };
+    }
+  }
+
+  private nextBreakOrTimerEnd(timerService: TimerService): NextState {
+    const breakTime = Math.min(timerService.timeRemaining, this.breakPeriod());
+
+    if (timerService.timeRemaining > 0) {
+      return { state: TimerState.Break, stateDuration: breakTime };
     } else {
       return { state: TimerState.Dead, stateDuration: 0 };
     }

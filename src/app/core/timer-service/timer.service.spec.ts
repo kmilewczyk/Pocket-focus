@@ -13,9 +13,9 @@ describe('TimerService', () => {
   let service: TimerService;
   let timeKeeper: TimeKeeper;
 
-  let expectState = (expectedState: TimerState) => {
+  let expectState = (expectedState: TimerState, context?: string) => {
     service.timerState$.pipe(take(1)).subscribe(state => {
-      expect(state).toEqual(expectedState);
+      expect(state).toEqual(expectedState, context);
     });
   };
 
@@ -128,11 +128,11 @@ describe('TimerService', () => {
     service.startTimer();
     timeKeeper.forward(strategy.focusPeriod());
 
-    expectState(TimerState.Break);
+    expectState(TimerState.Break, " when focus period ends");
 
     timeKeeper.forward(strategy.breakPeriod());
 
-    expectState(TimerState.Focus);
+    expectState(TimerState.Focus, " when break ends.");
 
     service.stopTimer();
   });
