@@ -1,5 +1,5 @@
 import { ChangeDetectorRef } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, ComponentFixtureAutoDetect, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { SharedModule } from '../shared.module';
 
@@ -15,7 +15,10 @@ describe('WheelSelectComponent', () => {
     await TestBed.configureTestingModule({
       imports: [BrowserAnimationsModule],
       declarations: [WheelSelectComponent],
-      providers: [{ provide: ChangeDetectorRef, useValue: cdrSpy }],
+      providers: [
+        { provide: ChangeDetectorRef, useValue: cdrSpy },
+        { provide: ComponentFixtureAutoDetect, useValue: true },
+      ],
     }).compileComponents();
   });
 
